@@ -42,18 +42,20 @@ struct class_notes_frontendApp: App {
 
     var body: some Scene {
         WindowGroup {
-            if authManager.isAuthenticated {
-                ContentView()
-                    .environmentObject(authManager)
-            } else {
-                ClassNotesSignInView()
-                    .environmentObject(authManager)
+            Group {
+                if authManager.isAuthenticated {
+                    ContentView()
+                        .environmentObject(authManager)
+                } else {
+                    ClassNotesSignInView()
+                        .environmentObject(authManager)
+                }
+            }
+            .onOpenURL { url in
+                // Handle Google Sign-In callback
+                GoogleSignInService.shared.handle(url)
             }
         }
         .modelContainer(sharedModelContainer)
-        .onOpenURL { url in
-            // Handle Google Sign-In callback
-            GoogleSignInService.shared.handle(url)
-        }
     }
 }
