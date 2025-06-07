@@ -10,6 +10,7 @@ import SwiftData
 
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
+    @EnvironmentObject var authManager: AuthenticationManager
     @Query private var items: [Item]
 
     var body: some View {
@@ -36,6 +37,17 @@ struct ContentView: View {
                 ToolbarItem {
                     Button(action: addItem) {
                         Label("Add Item", systemImage: "plus")
+                    }
+                }
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Menu {
+                        Button(action: {
+                            authManager.signOut()
+                        }) {
+                            Label("Sign Out", systemImage: "arrow.right.square")
+                        }
+                    } label: {
+                        Image(systemName: "person.circle")
                     }
                 }
             }

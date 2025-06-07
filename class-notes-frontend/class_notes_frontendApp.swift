@@ -10,6 +10,8 @@ import SwiftData
 
 @main
 struct class_notes_frontendApp: App {
+    @StateObject private var authManager = AuthenticationManager.shared
+    
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             Item.self,
@@ -25,7 +27,13 @@ struct class_notes_frontendApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            if authManager.isAuthenticated {
+                ContentView()
+                    .environmentObject(authManager)
+            } else {
+                ClassNotesSignInView()
+                    .environmentObject(authManager)
+            }
         }
         .modelContainer(sharedModelContainer)
     }
