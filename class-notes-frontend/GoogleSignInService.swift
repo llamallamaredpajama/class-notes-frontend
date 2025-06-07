@@ -1,5 +1,10 @@
 import SwiftUI
 import GoogleSignIn
+#if os(iOS)
+import UIKit
+#elseif os(macOS)
+import AppKit
+#endif
 
 @MainActor
 class GoogleSignInService: NSObject, ObservableObject {
@@ -13,6 +18,7 @@ class GoogleSignInService: NSObject, ObservableObject {
     }
     
     func signIn() {
+        #if os(iOS)
         guard let presentingViewController = getRootViewController() else {
             print("Error: No presenting view controller available")
             return
@@ -22,35 +28,52 @@ class GoogleSignInService: NSObject, ObservableObject {
         error = nil
         
         GIDSignIn.sharedInstance.signIn(withPresenting: presentingViewController) { [weak self] result, error in
-            self?.isSigningIn = false
-            
-            if let error = error {
-                self?.error = error
-                print("Google Sign-In error: \(error.localizedDescription)")
-                return
-            }
-            
-            guard let result = result else {
-                print("Google Sign-In: No result")
-                return
-            }
-            
-            // Successfully signed in
-            let user = result.user
-            print("Google Sign-In successful for user: \(user.profile?.email ?? "No email")")
-            
-            // Get ID token for backend authentication if needed
-            if let idToken = user.idToken?.tokenString {
-                print("ID Token available for backend authentication")
-                // Send this token to your backend for verification
-            }
-            
-            // Update authentication state
-            AuthenticationManager.shared.signIn()
-            
-            // Store user info if needed
-            self?.storeUserInfo(user)
+            self?.handleSignInResult(result: result, error: error)
         }
+        #elseif os(macOS)
+        guard let presentingWindow = NSApplication.shared.keyWindow else {
+            print("Error: No presenting window available")
+            return
+        }
+        
+        isSigningIn = true
+        error = nil
+        
+        GIDSignIn.sharedInstance.signIn(withPresenting: presentingWindow) { [weak self] result, error in
+            self?.handleSignInResult(result: result, error: error)
+        }
+        #endif
+    }
+    
+    private func handleSignInResult(result: GIDSignInResult?, error: Error?) {
+        isSigningIn = false
+        
+        if let error = error {
+            self.error = error
+            print("Google Sign-In error: \(error.localizedDescription)")
+            return
+        }
+        
+        guard let result = result else {
+            print("Google Sign-In: No result")
+            return
+        }
+        
+        // Successfully signed in
+        let user = result.user
+        print("Google Sign-In successful for user: \(user.profile?.email ?? "No email")")
+        
+        // Get ID token for backend authentication if needed
+        if let idToken = user.idToken?.tokenString {
+            print("ID Token available for backend authentication")
+            // Send this token to your backend for verification
+        }
+        
+        // Update authentication state
+        AuthenticationManager.shared.signIn()
+        
+        // Store user info if needed
+        storeUserInfo(user)
     }
     
     func signOut() {
@@ -85,6 +108,7 @@ class GoogleSignInService: NSObject, ObservableObject {
         }
     }
     
+    #if os(iOS)
     private func getRootViewController() -> UIViewController? {
         guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
               let window = windowScene.windows.first else {
@@ -92,6 +116,7 @@ class GoogleSignInService: NSObject, ObservableObject {
         }
         return window.rootViewController
     }
+    #endif
 }
 
 // MARK: - URL Handling
