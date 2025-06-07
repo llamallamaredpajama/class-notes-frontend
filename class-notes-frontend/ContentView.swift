@@ -33,12 +33,6 @@ struct ContentView: View {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     EditButton()
                 }
-#endif
-                ToolbarItem {
-                    Button(action: addItem) {
-                        Label("Add Item", systemImage: "plus")
-                    }
-                }
                 ToolbarItem(placement: .navigationBarLeading) {
                     Menu {
                         Button(action: {
@@ -48,6 +42,24 @@ struct ContentView: View {
                         }
                     } label: {
                         Image(systemName: "person.circle")
+                    }
+                }
+#else
+                ToolbarItem(placement: .automatic) {
+                    Menu {
+                        Button(action: {
+                            GoogleSignInService.shared.signOut()
+                        }) {
+                            Label("Sign Out", systemImage: "arrow.right.square")
+                        }
+                    } label: {
+                        Image(systemName: "person.circle")
+                    }
+                }
+#endif
+                ToolbarItem {
+                    Button(action: addItem) {
+                        Label("Add Item", systemImage: "plus")
                     }
                 }
             }
