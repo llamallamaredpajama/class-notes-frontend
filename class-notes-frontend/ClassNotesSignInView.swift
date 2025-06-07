@@ -538,18 +538,7 @@ class SignInViewModel: ObservableObject {
     }
     
     func signInWithGoogle() {
-        Task {
-            isSigningIn = true
-            defer { isSigningIn = false }
-            
-            do {
-                // Implement Google Sign-In
-                // This would integrate with your GoogleSignInService
-                print("Google Sign-In initiated")
-            } catch {
-                self.error = AuthError.signInFailed(error.localizedDescription)
-            }
-        }
+        GoogleSignInService.shared.signIn()
     }
     
     private func processAppleSignIn(credential: ASAuthorizationAppleIDCredential) async {

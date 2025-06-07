@@ -7,6 +7,7 @@
 
 import SwiftUI
 import SwiftData
+import GoogleSignIn
 
 @main
 struct class_notes_frontendApp: App {
@@ -24,6 +25,20 @@ struct class_notes_frontendApp: App {
             fatalError("Could not create ModelContainer: \(error)")
         }
     }()
+    
+    init() {
+        // Configure Google Sign-In on app launch
+        guard let path = Bundle.main.path(forResource: "Info", ofType: "plist"),
+              let plist = NSDictionary(contentsOfFile: path),
+              let clientId = plist["GIDClientID"] as? String else {
+            fatalError("Google Sign-In configuration not found. Please add GIDClientID to Info.plist")
+        }
+        
+        GIDSignIn.sharedInstance.configuration = GIDConfiguration(clientID: clientId)
+        
+        // Restore previous sign-in if available
+        GoogleSignInService.shared.restorePreviousSignIn()
+    }
 
     var body: some Scene {
         WindowGroup {
@@ -36,5 +51,9 @@ struct class_notes_frontendApp: App {
             }
         }
         .modelContainer(sharedModelContainer)
+        .onOpenURL { url in
+            // Handle Google Sign-In callback
+            GoogleSignInService.shared.handle(url)
+        }
     }
 }

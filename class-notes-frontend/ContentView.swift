@@ -42,7 +42,7 @@ struct ContentView: View {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Menu {
                         Button(action: {
-                            authManager.signOut()
+                            GoogleSignInService.shared.signOut()
                         }) {
                             Label("Sign Out", systemImage: "arrow.right.square")
                         }
