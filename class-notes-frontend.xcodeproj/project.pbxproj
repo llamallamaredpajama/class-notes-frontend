@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		3F31637B2DF48B2700B3CA0B /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 3F31637A2DF48B2700B3CA0B /* GoogleSignIn */; };
 		3F31637D2DF48B2700B3CA0B /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 3F31637C2DF48B2700B3CA0B /* GoogleSignInSwift */; };
+		3FF0E69C2DF7E18C00E45E1E /* WhisperKit in Frameworks */ = {isa = PBXBuildFile; productRef = 3FF0E69B2DF7E18C00E45E1E /* WhisperKit */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -34,9 +35,56 @@
 		3F31634E2DF3F0A000B3CA0B /* class-notes-frontendUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "class-notes-frontendUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		3F3163D42DF661B300B3CA0B /* Exceptions for "class-notes-frontend" folder in "class-notes-frontend" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				.cursor/rules/accessibility.mdc,
+				.cursor/rules/audio.mdc,
+				.cursor/rules/authentication.mdc,
+				.cursor/rules/canvas.mdc,
+				.cursor/rules/main.mdc,
+				.cursor/rules/networking.mdc,
+				.cursor/rules/notifications.mdc,
+				.cursor/rules/performance.mdc,
+				.cursor/rules/README.md,
+				.cursor/rules/storage.mdc,
+				.cursor/rules/swiftui.mdc,
+				.cursor/rules/testing.mdc,
+				.gitignore,
+				.swiftlint.yml,
+				ADD_GOOGLE_SIGNIN_PACKAGE.md,
+				ARCHITECTURE.md,
+				"ClassNotes/Core/Services/BUNDLED-MODEL-SETUP.md",
+				"ClassNotes/Core/Services/WhisperKit-README.md",
+				ClassNotes/Lessons/PENCILKIT_INTEGRATION.md,
+				CONFIGURE_OAUTH_IDS.md,
+				CONTRIBUTING.md,
+				CURSOR_WORKFLOW.md,
+				download_official_google_logo.sh,
+				FIND_BUNDLE_ID.md,
+				generate_app_icons.py,
+				GoogleSignInSetup.md,
+				Info.plist,
+				LICENSE,
+				Package.swift,
+				README.md,
+				requirements.txt,
+				"Scripts/check-build.sh",
+				"Scripts/quick-start.sh",
+				"Scripts/run-tests.sh",
+				"Scripts/xcode-build.sh",
+			);
+			target = 3F3163332DF3F09F00B3CA0B /* class-notes-frontend */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		3F3163362DF3F09F00B3CA0B /* class-notes-frontend */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				3F3163D42DF661B300B3CA0B /* Exceptions for "class-notes-frontend" folder in "class-notes-frontend" target */,
+			);
 			path = "class-notes-frontend";
 			sourceTree = "<group>";
 		};
@@ -57,6 +105,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3FF0E69C2DF7E18C00E45E1E /* WhisperKit in Frameworks */,
 				3F31637B2DF48B2700B3CA0B /* GoogleSignIn in Frameworks */,
 				3F31637D2DF48B2700B3CA0B /* GoogleSignInSwift in Frameworks */,
 			);
@@ -85,6 +134,7 @@
 				3F3163362DF3F09F00B3CA0B /* class-notes-frontend */,
 				3F3163472DF3F0A000B3CA0B /* class-notes-frontendTests */,
 				3F3163512DF3F0A000B3CA0B /* class-notes-frontendUITests */,
+				3FF0E69A2DF7E18C00E45E1E /* Frameworks */,
 				3F3163352DF3F09F00B3CA0B /* Products */,
 			);
 			sourceTree = "<group>";
@@ -97,6 +147,13 @@
 				3F31634E2DF3F0A000B3CA0B /* class-notes-frontendUITests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		3FF0E69A2DF7E18C00E45E1E /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -121,6 +178,7 @@
 			packageProductDependencies = (
 				3F31637A2DF48B2700B3CA0B /* GoogleSignIn */,
 				3F31637C2DF48B2700B3CA0B /* GoogleSignInSwift */,
+				3FF0E69B2DF7E18C00E45E1E /* WhisperKit */,
 			);
 			productName = "class-notes-frontend";
 			productReference = 3F3163342DF3F09F00B3CA0B /* class-notes-frontend.app */;
@@ -206,6 +264,8 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				3F3163792DF48B2700B3CA0B /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
+				3F8C8F812DF7DBEB0094D388 /* XCRemoteSwiftPackageReference "KeychainAccess" */,
+				3F8C8F822DF7DC500094D388 /* XCRemoteSwiftPackageReference "WhisperKit" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 3F3163352DF3F09F00B3CA0B /* Products */;
@@ -333,6 +393,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
@@ -388,6 +449,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
@@ -403,8 +465,12 @@
 				CODE_SIGN_ENTITLEMENTS = "class-notes-frontend/class_notes_frontend.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = GHK224XS3G;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "class-notes-frontend/Info.plist";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Class Notes needs access to your microphone to record and transcribe lectures in real-time.";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Class Notes uses speech recognition to convert your recordings into text.";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -440,8 +506,12 @@
 				CODE_SIGN_ENTITLEMENTS = "class-notes-frontend/class_notes_frontend.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = GHK224XS3G;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "class-notes-frontend/Info.plist";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Class Notes needs access to your microphone to record and transcribe lectures in real-time.";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Class Notes uses speech recognition to convert your recordings into text.";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -605,6 +675,22 @@
 				minimumVersion = 8.0.0;
 			};
 		};
+		3F8C8F812DF7DBEB0094D388 /* XCRemoteSwiftPackageReference "KeychainAccess" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/kishikawakatsumi/KeychainAccess.git";
+			requirement = {
+				branch = master;
+				kind = branch;
+			};
+		};
+		3F8C8F822DF7DC500094D388 /* XCRemoteSwiftPackageReference "WhisperKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/argmaxinc/WhisperKit.git";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -617,6 +703,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 3F3163792DF48B2700B3CA0B /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
 			productName = GoogleSignInSwift;
+		};
+		3FF0E69B2DF7E18C00E45E1E /* WhisperKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3F8C8F822DF7DC500094D388 /* XCRemoteSwiftPackageReference "WhisperKit" */;
+			productName = WhisperKit;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
