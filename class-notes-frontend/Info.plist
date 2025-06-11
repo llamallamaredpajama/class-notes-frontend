@@ -6,5 +6,16 @@
 	<array>
 		<string>audio</string>
 	</array>
+	<key>GIDClientID</key>
+	<string>332669090798-8480g9l4siqsr6rt505ofd8ke9se3e2q.apps.googleusercontent.com</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.332669090798-8480g9l4siqsr6rt505ofd8ke9se3e2q</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>
