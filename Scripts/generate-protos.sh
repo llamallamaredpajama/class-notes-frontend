@@ -1,0 +1,3 @@
+#!/bin/bash
+set -e
+echo "Starting proto generation..."; SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"; PROJECT_ROOT="$( cd "$SCRIPT_DIR/../../.." && pwd )"; BACKEND_PROTO_DIR="$PROJECT_ROOT/Backend/proto"; OUTPUT_DIR="$SCRIPT_DIR/../ClassNotes/Core/Networking/gRPC/Generated"; mkdir -p "$OUTPUT_DIR"; echo "Output: $OUTPUT_DIR"; find "$BACKEND_PROTO_DIR" -name "*.proto" -not -path "*/google/*" | while read proto_file; do echo "Processing: $proto_file"; protoc --proto_path="$BACKEND_PROTO_DIR" --proto_path="$PROJECT_ROOT/Backend/include" --swift_out="$OUTPUT_DIR" --swift_opt=Visibility=Public --grpc-swift_out="$OUTPUT_DIR" --grpc-swift_opt=Visibility=Public --grpc-swift_opt=Client=true --grpc-swift_opt=Server=false "$proto_file"; done; echo "Complete!"
