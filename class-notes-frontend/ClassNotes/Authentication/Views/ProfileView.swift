@@ -1,113 +1,31 @@
-import SwiftUI
+// 2. Apple frameworks
 import SwiftData
+// 1. Standard library
+import SwiftUI
 
 /// User profile view with settings and account management
 struct ProfileView: View {
+    // MARK: - Properties
     @EnvironmentObject private var authViewModel: AuthenticationViewModel
     @Query private var users: [User]
     @State private var showingSignOutAlert = false
-    
+
     private var currentUser: User? {
         users.first
     }
-    
+
+    // MARK: - Body
     var body: some View {
         NavigationStack {
             List {
-                // User Info Section
-                if let user = currentUser {
-                    Section {
-                        HStack {
-                            if let profileImageURL = user.profileImageURL {
-                                AsyncImage(url: profileImageURL) { image in
-                                    image
-                                        .resizable()
-                                        .aspectRatio(contentMode: .fill)
-                                } placeholder: {
-                                    Image(systemName: "person.circle.fill")
-                                        .font(.system(size: 60))
-                                        .foregroundColor(.gray)
-                                }
-                                .frame(width: 80, height: 80)
-                                .clipShape(Circle())
-                            } else {
-                                Image(systemName: "person.circle.fill")
-                                    .font(.system(size: 80))
-                                    .foregroundColor(.gray)
-                            }
-                            
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text(user.displayName)
-                                    .font(.title2)
-                                    .fontWeight(.semibold)
-                                
-                                Text(user.email)
-                                    .font(.subheadline)
-                                    .foregroundColor(.secondary)
-                                
-                                HStack {
-                                    Image(systemName: "checkmark.shield.fill")
-                                        .font(.caption)
-                                        .foregroundColor(.green)
-                                    Text(user.authProvider.capitalized)
-                                        .font(.caption)
-                                        .foregroundColor(.secondary)
-                                }
-                            }
-                            
-                            Spacer()
-                        }
-                        .padding(.vertical, 8)
-                    }
-                }
-                
-                // Preferences Section
-                Section("Preferences") {
-                    NavigationLink(destination: PreferencesView()) {
-                        Label("Preferences", systemImage: "gearshape")
-                    }
-                    
-                    NavigationLink(destination: NotificationSettingsView()) {
-                        Label("Notifications", systemImage: "bell")
-                    }
-                    
-                    NavigationLink(destination: PrivacySettingsView()) {
-                        Label("Privacy", systemImage: "lock")
-                    }
-                }
-                
-                // App Information Section
-                Section("About") {
-                    NavigationLink(destination: AboutView()) {
-                        Label("About Class Notes", systemImage: "info.circle")
-                    }
-                    
-                    NavigationLink(destination: HelpView()) {
-                        Label("Help & Support", systemImage: "questionmark.circle")
-                    }
-                    
-                    Link(destination: URL(string: "https://classnotes.app/privacy")!) {
-                        Label("Privacy Policy", systemImage: "doc.text")
-                    }
-                    
-                    Link(destination: URL(string: "https://classnotes.app/terms")!) {
-                        Label("Terms of Service", systemImage: "doc.text")
-                    }
-                }
-                
-                // Account Actions Section
-                Section {
-                    Button(role: .destructive) {
-                        showingSignOutAlert = true
-                    } label: {
-                        Label("Sign Out", systemImage: "arrow.right.square")
-                            .foregroundColor(.red)
-                    }
-                }
+                userInfoSection
+                preferencesSection
+                aboutSection
+                accountActionsSection
             }
             .navigationTitle("Profile")
             .alert("Sign Out", isPresented: $showingSignOutAlert) {
-                Button("Cancel", role: .cancel) { }
+                Button("Cancel", role: .cancel) {}
                 Button("Sign Out", role: .destructive) {
                     authViewModel.signOut()
                 }
@@ -116,52 +34,123 @@ struct ProfileView: View {
             }
         }
     }
-}
 
-// MARK: - Placeholder Views
+    // MARK: - Views
+    @ViewBuilder
+    private var userInfoSection: some View {
+        if let user = currentUser {
+            Section {
+                HStack {
+                    userProfileImage(for: user)
+                    userInfoDetails(for: user)
+                    Spacer()
+                }
+                .padding(.vertical, 8)
+            }
+        }
+    }
 
-struct PreferencesView: View {
-    var body: some View {
-        Text("Preferences")
-            .navigationTitle("Preferences")
-            .navigationBarTitleDisplayMode(.inline)
+    @ViewBuilder
+    private func userProfileImage(for user: User) -> some View {
+        if let profileImageURL = user.profileImageURL {
+            AsyncImage(url: profileImageURL) { image in
+                image
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+            } placeholder: {
+                Image(systemName: "person.circle.fill")
+                    .font(.system(size: 60))
+                    .foregroundColor(.gray)
+            }
+            .frame(width: 80, height: 80)
+            .clipShape(Circle())
+        } else {
+            Image(systemName: "person.circle.fill")
+                .font(.system(size: 80))
+                .foregroundColor(.gray)
+        }
+    }
+
+    @ViewBuilder
+    private func userInfoDetails(for user: User) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(user.displayName)
+                .font(.title2)
+                .fontWeight(.semibold)
+
+            Text(user.email)
+                .font(.subheadline)
+                .foregroundColor(.secondary)
+
+            HStack {
+                Image(systemName: "checkmark.shield.fill")
+                    .font(.caption)
+                    .foregroundColor(.green)
+                Text(user.authProvider.capitalized)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var preferencesSection: some View {
+        Section("Preferences") {
+            NavigationLink(destination: SubscriptionView()) {
+                Label("Subscription", systemImage: "creditcard")
+            }
+
+            NavigationLink(destination: PreferencesView()) {
+                Label("Preferences", systemImage: "gearshape")
+            }
+
+            NavigationLink(destination: NotificationSettingsView()) {
+                Label("Notifications", systemImage: "bell")
+            }
+
+            NavigationLink(destination: PrivacySettingsView()) {
+                Label("Privacy", systemImage: "lock")
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var aboutSection: some View {
+        Section("About") {
+            NavigationLink(destination: AboutView()) {
+                Label("About Class Notes", systemImage: "info.circle")
+            }
+
+            NavigationLink(destination: HelpView()) {
+                Label("Help & Support", systemImage: "questionmark.circle")
+            }
+
+            Link(destination: URL(string: "https://classnotes.app/privacy")!) {
+                Label("Privacy Policy", systemImage: "doc.text")
+            }
+
+            Link(destination: URL(string: "https://classnotes.app/terms")!) {
+                Label("Terms of Service", systemImage: "doc.text")
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var accountActionsSection: some View {
+        Section {
+            Button(role: .destructive) {
+                showingSignOutAlert = true
+            } label: {
+                Label("Sign Out", systemImage: "arrow.right.square")
+                    .foregroundColor(.red)
+            }
+        }
     }
 }
 
-struct NotificationSettingsView: View {
-    var body: some View {
-        Text("Notification Settings")
-            .navigationTitle("Notifications")
-            .navigationBarTitleDisplayMode(.inline)
-    }
-}
-
-struct PrivacySettingsView: View {
-    var body: some View {
-        Text("Privacy Settings")
-            .navigationTitle("Privacy")
-            .navigationBarTitleDisplayMode(.inline)
-    }
-}
-
-struct AboutView: View {
-    var body: some View {
-        Text("About Class Notes")
-            .navigationTitle("About")
-            .navigationBarTitleDisplayMode(.inline)
-    }
-}
-
-struct HelpView: View {
-    var body: some View {
-        Text("Help & Support")
-            .navigationTitle("Help")
-            .navigationBarTitleDisplayMode(.inline)
-    }
-}
-
+// MARK: - Preview
 #Preview {
     ProfileView()
         .environmentObject(AuthenticationViewModel(authService: MockAuthenticationService()))
         .modelContainer(PersistenceController.preview.container)
-} 
+}

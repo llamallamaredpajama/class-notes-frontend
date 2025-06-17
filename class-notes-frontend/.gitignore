@@ -133,6 +133,7 @@ GoogleService-Info.plist
 *.swp
 *.swo
 *~
+.xcodesyncignore
 
 # Cursor AI
 .cursor/

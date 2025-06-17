@@ -3,12 +3,28 @@ import SwiftData
 
 /// Main view for displaying the list of lessons
 struct LessonsListView: View {
+    // MARK: - Properties
+    
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \Lesson.createdAt, order: .reverse) private var lessons: [Lesson]
     
     @StateObject private var viewModel = LessonListViewModel(lessonService: MockLessonService())
     @State private var showingAddLesson = false
     @State private var searchText = ""
+    
+    private var filteredLessons: [Lesson] {
+        if searchText.isEmpty {
+            return lessons
+        } else {
+            return lessons.filter { lesson in
+                lesson.title.localizedCaseInsensitiveContains(searchText) ||
+                lesson.transcript.localizedCaseInsensitiveContains(searchText) ||
+                lesson.tags.contains { $0.localizedCaseInsensitiveContains(searchText) }
+            }
+        }
+    }
+    
+    // MARK: - Body
     
     var body: some View {
         NavigationStack {
@@ -37,6 +53,8 @@ struct LessonsListView: View {
         }
     }
     
+    // MARK: - Views
+    
     private var lessonsList: some View {
         List {
             ForEach(filteredLessons) { lesson in
@@ -48,17 +66,7 @@ struct LessonsListView: View {
         }
     }
     
-    private var filteredLessons: [Lesson] {
-        if searchText.isEmpty {
-            return lessons
-        } else {
-            return lessons.filter { lesson in
-                lesson.title.localizedCaseInsensitiveContains(searchText) ||
-                lesson.transcript.localizedCaseInsensitiveContains(searchText) ||
-                lesson.tags.contains { $0.localizedCaseInsensitiveContains(searchText) }
-            }
-        }
-    }
+    // MARK: - Methods
     
     private func deleteLessons(at offsets: IndexSet) {
         for index in offsets {
@@ -67,9 +75,15 @@ struct LessonsListView: View {
     }
 }
 
+// MARK: - Supporting Views
+
 /// View shown when there are no lessons
 struct EmptyLessonsView: View {
+    // MARK: - Properties
+    
     @Binding var showingAddLesson: Bool
+    
+    // MARK: - Body
     
     var body: some View {
         VStack(spacing: 20) {
@@ -97,73 +111,96 @@ struct EmptyLessonsView: View {
 
 /// Row view for displaying a lesson in the list
 struct LessonRowView: View {
+    // MARK: - Properties
+    
     let lesson: Lesson
+    
+    // MARK: - Body
     
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            HStack {
-                Text(lesson.title)
-                    .font(.headline)
-                    .lineLimit(1)
-                
-                Spacer()
-                
-                if lesson.isFavorite {
-                    Image(systemName: "star.fill")
-                        .foregroundColor(.yellow)
-                        .font(.caption)
-                }
-            }
-            
-            HStack {
-                if let course = lesson.course {
-                    Text(course.name)
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
-                
-                Text(lesson.formattedDate)
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                
-                Spacer()
-                
-                if lesson.hasAudio {
-                    Image(systemName: "mic.fill")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
-                
-                if lesson.hasPDF {
-                    Image(systemName: "doc.fill")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
-            }
+            headerSection
+            metadataSection
             
             if !lesson.tags.isEmpty {
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 4) {
-                        ForEach(lesson.tags, id: \.self) { tag in
-                            Text(tag)
-                                .font(.caption2)
-                                .padding(.horizontal, 8)
-                                .padding(.vertical, 2)
-                                .background(Color.secondary.opacity(0.2))
-                                .cornerRadius(4)
-                        }
-                    }
-                }
+                tagsSection
             }
             
             if lesson.progress > 0 {
-                ProgressView(value: lesson.progress)
-                    .tint(.accentColor)
+                progressSection
             }
         }
         .padding(.vertical, 4)
     }
+    
+    // MARK: - Views
+    
+    private var headerSection: some View {
+        HStack {
+            Text(lesson.title)
+                .font(.headline)
+                .lineLimit(1)
+            
+            Spacer()
+            
+            if lesson.isFavorite {
+                Image(systemName: "star.fill")
+                    .foregroundColor(.yellow)
+                    .font(.caption)
+            }
+        }
+    }
+    
+    private var metadataSection: some View {
+        HStack {
+            if let course = lesson.course {
+                Text(course.name)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+            
+            Text(lesson.formattedDate)
+                .font(.caption)
+                .foregroundColor(.secondary)
+            
+            Spacer()
+            
+            if lesson.hasAudio {
+                Image(systemName: "mic.fill")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+            
+            if lesson.hasPDF {
+                Image(systemName: "doc.fill")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+        }
+    }
+    
+    private var tagsSection: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 4) {
+                ForEach(lesson.tags, id: \.self) { tag in
+                    Text(tag)
+                        .font(.caption2)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 2)
+                        .background(Color.secondary.opacity(0.2))
+                        .cornerRadius(4)
+                }
+            }
+        }
+    }
+    
+    private var progressSection: some View {
+        ProgressView(value: lesson.progress)
+            .tint(.accentColor)
+    }
 }
+
+// MARK: - Preview
 
 #Preview {
     LessonsListView()

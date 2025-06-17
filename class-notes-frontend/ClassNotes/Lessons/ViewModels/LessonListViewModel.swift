@@ -39,7 +39,7 @@ class LessonListViewModel: ObservableObject {
     
     // MARK: - Private Properties
     private let lessonService: LessonServiceProtocol
-    private let logger = Logger.lessons
+    private let logger = OSLog.lessons
     
     // MARK: - Initialization
     init(lessonService: LessonServiceProtocol) {

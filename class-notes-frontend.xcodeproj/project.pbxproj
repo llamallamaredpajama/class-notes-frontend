@@ -7,8 +7,25 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3F27EE852E01110200CDB10B /* GRPCCodeGen in Frameworks */ = {isa = PBXBuildFile; productRef = 3F27EE842E01110200CDB10B /* GRPCCodeGen */; };
 		3F31637B2DF48B2700B3CA0B /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 3F31637A2DF48B2700B3CA0B /* GoogleSignIn */; };
 		3F31637D2DF48B2700B3CA0B /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 3F31637C2DF48B2700B3CA0B /* GoogleSignInSwift */; };
+		3F76076C2E00FDF900A04914 /* GRPCNIOTransportHTTP2 in Frameworks */ = {isa = PBXBuildFile; productRef = 3F76076B2E00FDF900A04914 /* GRPCNIOTransportHTTP2 */; };
+		3F76076F2E00FE2800A04914 /* GRPCProtobuf in Frameworks */ = {isa = PBXBuildFile; productRef = 3F76076E2E00FE2800A04914 /* GRPCProtobuf */; };
+		3F7607722E01000600A04914 /* GRPCCore in Frameworks */ = {isa = PBXBuildFile; productRef = 3F7607712E01000600A04914 /* GRPCCore */; };
+		3F7F2AA72E011E2F00C6329A /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = 3F7F2AA62E011E2F00C6329A /* FirebaseMessaging */; };
+		3F7F2AA92E011F5B00C6329A /* FirebaseAI in Frameworks */ = {isa = PBXBuildFile; productRef = 3F7F2AA82E011F5B00C6329A /* FirebaseAI */; };
+		3F7F2AAB2E011F5B00C6329A /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 3F7F2AAA2E011F5B00C6329A /* FirebaseAnalytics */; };
+		3F7F2AAD2E011F5B00C6329A /* FirebaseAnalyticsCore in Frameworks */ = {isa = PBXBuildFile; productRef = 3F7F2AAC2E011F5B00C6329A /* FirebaseAnalyticsCore */; };
+		3F7F2AAF2E011F5B00C6329A /* FirebaseAppCheck in Frameworks */ = {isa = PBXBuildFile; productRef = 3F7F2AAE2E011F5B00C6329A /* FirebaseAppCheck */; };
+		3F7F2AB12E011F5B00C6329A /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 3F7F2AB02E011F5B00C6329A /* FirebaseAuth */; };
+		3F7F2AB32E011F5B00C6329A /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = 3F7F2AB22E011F5B00C6329A /* FirebaseCrashlytics */; };
+		3F7F2AB52E011F5B00C6329A /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 3F7F2AB42E011F5B00C6329A /* FirebaseFirestore */; };
+		3F7F2AB72E011F5B00C6329A /* FirebasePerformance in Frameworks */ = {isa = PBXBuildFile; productRef = 3F7F2AB62E011F5B00C6329A /* FirebasePerformance */; };
+		3F7F2AB92E011F5B00C6329A /* FirebaseRemoteConfig in Frameworks */ = {isa = PBXBuildFile; productRef = 3F7F2AB82E011F5B00C6329A /* FirebaseRemoteConfig */; };
+		3F7F2ABB2E011F5B00C6329A /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 3F7F2ABA2E011F5B00C6329A /* FirebaseStorage */; };
+		3F7F2ABD2E011F5B00C6329A /* FirebaseVertexAI in Frameworks */ = {isa = PBXBuildFile; productRef = 3F7F2ABC2E011F5B00C6329A /* FirebaseVertexAI */; };
+		3FB242192DFE66AB00641883 /* SwiftProtobuf in Frameworks */ = {isa = PBXBuildFile; productRef = 3FB242182DFE66AB00641883 /* SwiftProtobuf */; };
 		3FF0E69C2DF7E18C00E45E1E /* WhisperKit in Frameworks */ = {isa = PBXBuildFile; productRef = 3FF0E69B2DF7E18C00E45E1E /* WhisperKit */; };
 /* End PBXBuildFile section */
 
@@ -67,7 +84,6 @@
 				GoogleSignInSetup.md,
 				Info.plist,
 				LICENSE,
-				Package.swift,
 				README.md,
 				requirements.txt,
 				"Scripts/check-build.sh",
@@ -105,9 +121,26 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3F7F2AA72E011E2F00C6329A /* FirebaseMessaging in Frameworks */,
+				3F7F2AAF2E011F5B00C6329A /* FirebaseAppCheck in Frameworks */,
+				3F76076F2E00FE2800A04914 /* GRPCProtobuf in Frameworks */,
+				3F76076C2E00FDF900A04914 /* GRPCNIOTransportHTTP2 in Frameworks */,
 				3FF0E69C2DF7E18C00E45E1E /* WhisperKit in Frameworks */,
+				3F7F2AB52E011F5B00C6329A /* FirebaseFirestore in Frameworks */,
+				3F7F2AB12E011F5B00C6329A /* FirebaseAuth in Frameworks */,
 				3F31637B2DF48B2700B3CA0B /* GoogleSignIn in Frameworks */,
+				3F7F2AA92E011F5B00C6329A /* FirebaseAI in Frameworks */,
+				3F7F2ABB2E011F5B00C6329A /* FirebaseStorage in Frameworks */,
+				3F7F2AB92E011F5B00C6329A /* FirebaseRemoteConfig in Frameworks */,
+				3F7F2AB72E011F5B00C6329A /* FirebasePerformance in Frameworks */,
+				3F7F2AAB2E011F5B00C6329A /* FirebaseAnalytics in Frameworks */,
+				3F7F2AAD2E011F5B00C6329A /* FirebaseAnalyticsCore in Frameworks */,
+				3F27EE852E01110200CDB10B /* GRPCCodeGen in Frameworks */,
+				3FB242192DFE66AB00641883 /* SwiftProtobuf in Frameworks */,
+				3F7F2AB32E011F5B00C6329A /* FirebaseCrashlytics in Frameworks */,
+				3F7F2ABD2E011F5B00C6329A /* FirebaseVertexAI in Frameworks */,
 				3F31637D2DF48B2700B3CA0B /* GoogleSignInSwift in Frameworks */,
+				3F7607722E01000600A04914 /* GRPCCore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -179,6 +212,23 @@
 				3F31637A2DF48B2700B3CA0B /* GoogleSignIn */,
 				3F31637C2DF48B2700B3CA0B /* GoogleSignInSwift */,
 				3FF0E69B2DF7E18C00E45E1E /* WhisperKit */,
+				3FB242182DFE66AB00641883 /* SwiftProtobuf */,
+				3F76076B2E00FDF900A04914 /* GRPCNIOTransportHTTP2 */,
+				3F76076E2E00FE2800A04914 /* GRPCProtobuf */,
+				3F7607712E01000600A04914 /* GRPCCore */,
+				3F27EE842E01110200CDB10B /* GRPCCodeGen */,
+				3F7F2AA62E011E2F00C6329A /* FirebaseMessaging */,
+				3F7F2AA82E011F5B00C6329A /* FirebaseAI */,
+				3F7F2AAA2E011F5B00C6329A /* FirebaseAnalytics */,
+				3F7F2AAC2E011F5B00C6329A /* FirebaseAnalyticsCore */,
+				3F7F2AAE2E011F5B00C6329A /* FirebaseAppCheck */,
+				3F7F2AB02E011F5B00C6329A /* FirebaseAuth */,
+				3F7F2AB22E011F5B00C6329A /* FirebaseCrashlytics */,
+				3F7F2AB42E011F5B00C6329A /* FirebaseFirestore */,
+				3F7F2AB62E011F5B00C6329A /* FirebasePerformance */,
+				3F7F2AB82E011F5B00C6329A /* FirebaseRemoteConfig */,
+				3F7F2ABA2E011F5B00C6329A /* FirebaseStorage */,
+				3F7F2ABC2E011F5B00C6329A /* FirebaseVertexAI */,
 			);
 			productName = "class-notes-frontend";
 			productReference = 3F3163342DF3F09F00B3CA0B /* class-notes-frontend.app */;
@@ -266,6 +316,11 @@
 				3F3163792DF48B2700B3CA0B /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
 				3F8C8F812DF7DBEB0094D388 /* XCRemoteSwiftPackageReference "KeychainAccess" */,
 				3F8C8F822DF7DC500094D388 /* XCRemoteSwiftPackageReference "WhisperKit" */,
+				3FB242172DFE66AB00641883 /* XCRemoteSwiftPackageReference "swift-protobuf" */,
+				3F76076A2E00FDF900A04914 /* XCRemoteSwiftPackageReference "grpc-swift-nio-transport" */,
+				3F76076D2E00FE2800A04914 /* XCRemoteSwiftPackageReference "grpc-swift-protobuf" */,
+				3F7607702E01000600A04914 /* XCRemoteSwiftPackageReference "grpc-swift-2" */,
+				3F7F2AA52E011E2E00C6329A /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 3F3163352DF3F09F00B3CA0B /* Products */;
@@ -484,17 +539,15 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 18.4;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "Scriblo.class-notes-frontend";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
-				SDKROOT = auto;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2,7";
-				XROS_DEPLOYMENT_TARGET = 2.4;
+				TARGETED_DEVICE_FAMILY = 2;
 			};
 			name = Debug;
 		};
@@ -525,17 +578,15 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 18.4;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "Scriblo.class-notes-frontend";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
-				SDKROOT = auto;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2,7";
-				XROS_DEPLOYMENT_TARGET = 2.4;
+				TARGETED_DEVICE_FAMILY = 2;
 			};
 			name = Release;
 		};
@@ -547,17 +598,15 @@
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.4;
-				MACOSX_DEPLOYMENT_TARGET = 15.4;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "Scriblo.class-notes-frontendTests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = auto;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2,7";
+				TARGETED_DEVICE_FAMILY = 2;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/class-notes-frontend.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/class-notes-frontend";
-				XROS_DEPLOYMENT_TARGET = 2.4;
 			};
 			name = Debug;
 		};
@@ -569,17 +618,15 @@
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.4;
-				MACOSX_DEPLOYMENT_TARGET = 15.4;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "Scriblo.class-notes-frontendTests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = auto;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2,7";
+				TARGETED_DEVICE_FAMILY = 2;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/class-notes-frontend.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/class-notes-frontend";
-				XROS_DEPLOYMENT_TARGET = 2.4;
 			};
 			name = Release;
 		};
@@ -590,17 +637,15 @@
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.4;
-				MACOSX_DEPLOYMENT_TARGET = 15.4;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "Scriblo.class-notes-frontendUITests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = auto;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2,7";
+				TARGETED_DEVICE_FAMILY = 2;
 				TEST_TARGET_NAME = "class-notes-frontend";
-				XROS_DEPLOYMENT_TARGET = 2.4;
 			};
 			name = Debug;
 		};
@@ -611,17 +656,15 @@
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.4;
-				MACOSX_DEPLOYMENT_TARGET = 15.4;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "Scriblo.class-notes-frontendUITests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = auto;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2,7";
+				TARGETED_DEVICE_FAMILY = 2;
 				TEST_TARGET_NAME = "class-notes-frontend";
-				XROS_DEPLOYMENT_TARGET = 2.4;
 			};
 			name = Release;
 		};
@@ -675,6 +718,38 @@
 				minimumVersion = 8.0.0;
 			};
 		};
+		3F76076A2E00FDF900A04914 /* XCRemoteSwiftPackageReference "grpc-swift-nio-transport" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/grpc/grpc-swift-nio-transport";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.0.0;
+			};
+		};
+		3F76076D2E00FE2800A04914 /* XCRemoteSwiftPackageReference "grpc-swift-protobuf" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/grpc/grpc-swift-protobuf";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.0.0;
+			};
+		};
+		3F7607702E01000600A04914 /* XCRemoteSwiftPackageReference "grpc-swift-2" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/grpc/grpc-swift-2.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.0.0;
+			};
+		};
+		3F7F2AA52E011E2E00C6329A /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 11.14.0;
+			};
+		};
 		3F8C8F812DF7DBEB0094D388 /* XCRemoteSwiftPackageReference "KeychainAccess" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/kishikawakatsumi/KeychainAccess.git";
@@ -691,9 +766,22 @@
 				kind = branch;
 			};
 		};
+		3FB242172DFE66AB00641883 /* XCRemoteSwiftPackageReference "swift-protobuf" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/apple/swift-protobuf.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.30.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		3F27EE842E01110200CDB10B /* GRPCCodeGen */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3F7607702E01000600A04914 /* XCRemoteSwiftPackageReference "grpc-swift-2" */;
+			productName = GRPCCodeGen;
+		};
 		3F31637A2DF48B2700B3CA0B /* GoogleSignIn */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 3F3163792DF48B2700B3CA0B /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
@@ -703,6 +791,86 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 3F3163792DF48B2700B3CA0B /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
 			productName = GoogleSignInSwift;
+		};
+		3F76076B2E00FDF900A04914 /* GRPCNIOTransportHTTP2 */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3F76076A2E00FDF900A04914 /* XCRemoteSwiftPackageReference "grpc-swift-nio-transport" */;
+			productName = GRPCNIOTransportHTTP2;
+		};
+		3F76076E2E00FE2800A04914 /* GRPCProtobuf */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3F76076D2E00FE2800A04914 /* XCRemoteSwiftPackageReference "grpc-swift-protobuf" */;
+			productName = GRPCProtobuf;
+		};
+		3F7607712E01000600A04914 /* GRPCCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3F7607702E01000600A04914 /* XCRemoteSwiftPackageReference "grpc-swift-2" */;
+			productName = GRPCCore;
+		};
+		3F7F2AA62E011E2F00C6329A /* FirebaseMessaging */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3F7F2AA52E011E2E00C6329A /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseMessaging;
+		};
+		3F7F2AA82E011F5B00C6329A /* FirebaseAI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3F7F2AA52E011E2E00C6329A /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAI;
+		};
+		3F7F2AAA2E011F5B00C6329A /* FirebaseAnalytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3F7F2AA52E011E2E00C6329A /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalytics;
+		};
+		3F7F2AAC2E011F5B00C6329A /* FirebaseAnalyticsCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3F7F2AA52E011E2E00C6329A /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalyticsCore;
+		};
+		3F7F2AAE2E011F5B00C6329A /* FirebaseAppCheck */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3F7F2AA52E011E2E00C6329A /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAppCheck;
+		};
+		3F7F2AB02E011F5B00C6329A /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3F7F2AA52E011E2E00C6329A /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
+		};
+		3F7F2AB22E011F5B00C6329A /* FirebaseCrashlytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3F7F2AA52E011E2E00C6329A /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCrashlytics;
+		};
+		3F7F2AB42E011F5B00C6329A /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3F7F2AA52E011E2E00C6329A /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
+		};
+		3F7F2AB62E011F5B00C6329A /* FirebasePerformance */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3F7F2AA52E011E2E00C6329A /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebasePerformance;
+		};
+		3F7F2AB82E011F5B00C6329A /* FirebaseRemoteConfig */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3F7F2AA52E011E2E00C6329A /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseRemoteConfig;
+		};
+		3F7F2ABA2E011F5B00C6329A /* FirebaseStorage */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3F7F2AA52E011E2E00C6329A /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseStorage;
+		};
+		3F7F2ABC2E011F5B00C6329A /* FirebaseVertexAI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3F7F2AA52E011E2E00C6329A /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseVertexAI;
+		};
+		3FB242182DFE66AB00641883 /* SwiftProtobuf */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3FB242172DFE66AB00641883 /* XCRemoteSwiftPackageReference "swift-protobuf" */;
+			productName = SwiftProtobuf;
 		};
 		3FF0E69B2DF7E18C00E45E1E /* WhisperKit */ = {
 			isa = XCSwiftPackageProductDependency;

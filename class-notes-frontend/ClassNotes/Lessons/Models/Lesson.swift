@@ -181,4 +181,72 @@ extension Lesson {
     var hasPDF: Bool {
         pdfURL != nil
     }
+}
+
+// MARK: - Codable Representation
+
+/// Codable representation of Lesson for offline sync
+struct CodableLesson: Codable {
+    let id: UUID
+    let title: String
+    let createdAt: Date
+    let lastModified: Date
+    let progress: Double
+    let orderIndex: Int
+    let isFavorite: Bool
+    let tags: [String]
+    let date: Date
+    let duration: Int
+    let transcript: String
+    let audioURL: URL?
+    let pdfURL: URL?
+    let syncStatus: SyncStatus
+    let courseId: UUID?
+    
+    /// Create from Lesson model
+    init(from lesson: Lesson) {
+        self.id = lesson.id
+        self.title = lesson.title
+        self.createdAt = lesson.createdAt
+        self.lastModified = lesson.lastModified
+        self.progress = lesson.progress
+        self.orderIndex = lesson.orderIndex
+        self.isFavorite = lesson.isFavorite
+        self.tags = lesson.tags
+        self.date = lesson.date
+        self.duration = lesson.duration
+        self.transcript = lesson.transcript
+        self.audioURL = lesson.audioURL
+        self.pdfURL = lesson.pdfURL
+        self.syncStatus = lesson.syncStatus
+        self.courseId = lesson.course?.id
+    }
+    
+    /// Convert to Lesson model
+    func toLesson() -> Lesson {
+        let lesson = Lesson(
+            title: title,
+            date: date,
+            duration: duration,
+            transcript: transcript,
+            audioURL: audioURL,
+            pdfURL: pdfURL,
+            tags: tags,
+            isFavorite: isFavorite,
+            lastModified: lastModified,
+            syncStatus: syncStatus
+        )
+        lesson.id = id
+        lesson.progress = progress
+        lesson.orderIndex = orderIndex
+        lesson.createdAt = createdAt
+        return lesson
+    }
+}
+
+extension Lesson {
+    /// Convert to codable representation
+    var codable: CodableLesson {
+        CodableLesson(from: self)
+    }
 } 

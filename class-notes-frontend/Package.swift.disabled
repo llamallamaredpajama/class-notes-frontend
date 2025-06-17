@@ -1,0 +1,41 @@
+// swift-tools-version: 5.9
+import PackageDescription
+
+let package = Package(
+    name: "ClassNotesApp",
+    platforms: [
+        .iOS(.v16),
+        .macOS(.v13),
+    ],
+    products: [
+        .library(
+            name: "ClassNotesGRPC",
+            targets: ["ClassNotesGRPC"]
+        )
+    ],
+    dependencies: [
+        // gRPC Swift
+        .package(url: "https://github.com/grpc/grpc-swift.git", from: "1.21.0"),
+        // SwiftProtobuf
+        .package(url: "https://github.com/apple/swift-protobuf.git", from: "1.25.0"),
+        // NIO for networking
+        .package(url: "https://github.com/apple/swift-nio.git", from: "2.63.0"),
+        .package(url: "https://github.com/apple/swift-nio-ssl.git", from: "2.26.0"),
+        .package(url: "https://github.com/apple/swift-nio-http2.git", from: "1.30.0"),
+        .package(url: "https://github.com/apple/swift-nio-transport-services.git", from: "1.20.0"),
+    ],
+    targets: [
+        .target(
+            name: "ClassNotesGRPC",
+            dependencies: [
+                .product(name: "GRPC", package: "grpc-swift"),
+                .product(name: "SwiftProtobuf", package: "swift-protobuf"),
+                .product(name: "NIO", package: "swift-nio"),
+                .product(name: "NIOSSL", package: "swift-nio-ssl"),
+                .product(name: "NIOHTTP2", package: "swift-nio-http2"),
+                .product(name: "NIOTransportServices", package: "swift-nio-transport-services"),
+            ],
+            path: "ClassNotes/Core/Networking/gRPC/Generated"
+        )
+    ]
+)

@@ -6,40 +6,89 @@
 //
 
 import OSLog
+import os
 
-extension Logger {
+extension OSLog {
     // MARK: - Subsystem
     /// Main subsystem for all app logging
     private static let subsystem = "com.classnotes.app"
     
     // MARK: - Feature Loggers
     /// Logger for authentication-related events
-    static let authentication = Logger(subsystem: subsystem, category: "Authentication")
+    static let authentication = OSLog(subsystem: subsystem, category: "Authentication")
     
     /// Logger for lesson management
-    static let lessons = Logger(subsystem: subsystem, category: "Lessons")
+    static let lessons = OSLog(subsystem: subsystem, category: "Lessons")
     
     /// Logger for networking and API calls
-    static let networking = Logger(subsystem: subsystem, category: "Networking")
+    static let networking = OSLog(subsystem: subsystem, category: "Networking")
     
     /// Logger for storage operations (Core Data, files)
-    static let storage = Logger(subsystem: subsystem, category: "Storage")
+    static let storage = OSLog(subsystem: subsystem, category: "Storage")
     
     /// Logger for UI events and interactions
-    static let ui = Logger(subsystem: subsystem, category: "UI")
+    static let ui = OSLog(subsystem: subsystem, category: "UI")
     
     /// Logger for audio recording and transcription
-    static let audio = Logger(subsystem: subsystem, category: "Audio")
+    static let audio = OSLog(subsystem: subsystem, category: "Audio")
     
     /// Logger for gRPC communication
-    static let grpc = Logger(subsystem: subsystem, category: "gRPC")
+    static let grpc = OSLog(subsystem: subsystem, category: "gRPC")
     
     /// Debug logger for development
-    static let debug = Logger(subsystem: subsystem, category: "Debug")
+    static let debug = OSLog(subsystem: subsystem, category: "Debug")
+    
+    /// Logger for security-related events
+    static let security = OSLog(subsystem: subsystem, category: "Security")
+    
+    /// Logger for subscription and in-app purchase events
+    static let subscription = OSLog(subsystem: subsystem, category: "Subscription")
+    
+    /// Logger for persistence operations (Core Data, encryption)
+    static let persistence = OSLog(subsystem: subsystem, category: "Persistence")
+    
+    /// Logger for push notifications
+    static let notifications = OSLog(subsystem: subsystem, category: "Notifications")
 }
 
 // MARK: - Convenience Extensions
-extension Logger {
+extension OSLog {
+    /// Log a debug message
+    func debug(_ message: String, metadata: [String: String]? = nil) {
+        if let metadata = metadata {
+            os_log(.debug, log: self, "%{public}@ | %{public}@", message, metadata.description)
+        } else {
+            os_log(.debug, log: self, "%{public}@", message)
+        }
+    }
+    
+    /// Log an info message
+    func info(_ message: String, metadata: [String: String]? = nil) {
+        if let metadata = metadata {
+            os_log(.info, log: self, "%{public}@ | %{public}@", message, metadata.description)
+        } else {
+            os_log(.info, log: self, "%{public}@", message)
+        }
+    }
+    
+    /// Log a warning message
+    func warning(_ message: String, metadata: [String: String]? = nil) {
+        if let metadata = metadata {
+            os_log(.default, log: self, "⚠️ %{public}@ | %{public}@", message, metadata.description)
+        } else {
+            os_log(.default, log: self, "⚠️ %{public}@", message)
+        }
+    }
+    
+    /// Log an error message
+    func error(_ message: String, metadata: [String: String]? = nil) {
+        if let metadata = metadata {
+            os_log(.error, log: self, "❌ %{public}@ | %{public}@", message, metadata.description)
+        } else {
+            os_log(.error, log: self, "❌ %{public}@", message)
+        }
+    }
+    
     /// Log a function entry point with parameters
     func functionEntry(_ function: String = #function, parameters: String? = nil) {
         if let parameters = parameters {
@@ -64,7 +113,7 @@ extension Logger {
         if let headers = headers, !headers.isEmpty {
             message += " | Headers: \(headers.count)"
         }
-        self.info("\(message)")
+        self.info(message)
     }
     
     /// Log a network response
@@ -76,18 +125,18 @@ extension Logger {
         
         switch statusCode {
         case 200..<300:
-            self.info("\(message)")
+            self.info(message)
         case 400..<500:
-            self.warning("\(message)")
+            self.warning(message)
         default:
-            self.error("\(message)")
+            self.error(message)
         }
     }
 }
 
 // MARK: - Debug Mode Helpers
 #if DEBUG
-extension Logger {
+extension OSLog {
     /// Log with visual separator for important events
     func milestone(_ message: String) {
         self.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
@@ -107,20 +156,20 @@ extension Logger {
 // MARK: - Usage Examples
 /*
  // Authentication logging
- Logger.authentication.info("User signed in successfully")
- Logger.authentication.error("Sign-in failed: \(error)")
+ OSLog.authentication.info("User signed in successfully")
+ OSLog.authentication.error("Sign-in failed: \(error)")
  
  // Network logging
- Logger.networking.networkRequest("GET", url: "https://api.classnotes.com/lessons")
- Logger.networking.networkResponse(200, url: "https://api.classnotes.com/lessons", duration: 0.234)
+ OSLog.networking.networkRequest("GET", url: "https://api.classnotes.com/lessons")
+ OSLog.networking.networkResponse(200, url: "https://api.classnotes.com/lessons", duration: 0.234)
  
  // Function tracing
- Logger.lessons.functionEntry("loadLessons", parameters: "userId: \(userId)")
- Logger.lessons.functionExit("loadLessons", result: "count: \(lessons.count)")
+ OSLog.lessons.functionEntry("loadLessons", parameters: "userId: \(userId)")
+ OSLog.lessons.functionExit("loadLessons", result: "count: \(lessons.count)")
  
  // Debug milestones
- Logger.debug.milestone("App launched")
+ OSLog.debug.milestone("App launched")
  
  // Performance tracking
- Logger.storage.performance("Core Data fetch", duration: 0.045)
+ OSLog.storage.performance("Core Data fetch", duration: 0.045)
  */ 
