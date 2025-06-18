@@ -29,6 +29,9 @@ final class Course {
     /// Color theme for the course (hex string)
     var color: String
     
+    /// Icon for the course
+    var icon: String
+    
     /// Date when the course was created
     var createdAt: Date
     
@@ -51,14 +54,16 @@ final class Course {
         courseCode: String? = nil,
         instructor: String? = nil,
         semester: String? = nil,
-        color: String = "#007AFF"
+        color: CourseColor = .blue,
+        icon: String = "book.fill"
     ) {
         self.id = UUID()
         self.name = name
         self.courseCode = courseCode
         self.instructor = instructor
         self.semester = semester
-        self.color = color
+        self.color = color.hexString
+        self.icon = icon
         self.createdAt = Date()
         self.lastModified = Date()
         self.isActive = true
@@ -69,6 +74,11 @@ final class Course {
 // MARK: - Extensions
 
 extension Course {
+    /// CourseColor enum representation
+    var courseColor: CourseColor {
+        CourseColor(hexString: color) ?? .blue
+    }
+    
     /// Total number of lessons
     var lessonCount: Int {
         lessons.count

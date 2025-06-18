@@ -1,14 +1,17 @@
 import Foundation
 import SwiftData
 
+// MARK: - Type Aliases to resolve ambiguity
+typealias AppUser = User
+
 /// Protocol defining the authentication service interface
 @MainActor
 protocol AuthenticationServiceProtocol {
     /// Indicates whether the user is currently authenticated
-    var isAuthenticated: Bool { get async }
+    var isAuthenticated: Bool { get }
 
     /// The currently authenticated user, if any
-    var currentUser: User? { get async }
+    var currentUser: AppUser? { get }
 
     /// Sign in with the default authentication method
     func signIn() async throws

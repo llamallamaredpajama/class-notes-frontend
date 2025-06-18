@@ -12,7 +12,6 @@ final class GRPCClientManager {
 
     // MARK: - Properties
     private var client: GRPCClient<HTTP2ClientTransport.Posix>?
-    private let authService: AuthenticationService
     
     // MARK: - Configuration
     private enum Config {
@@ -22,8 +21,8 @@ final class GRPCClientManager {
     }
 
     // MARK: - Initialization
-    private init(authService: AuthenticationService = AuthenticationService.shared) {
-        self.authService = authService
+    private init() {
+        // Remove authService initialization to avoid MainActor isolation issue
     }
 
     // MARK: - Client Access

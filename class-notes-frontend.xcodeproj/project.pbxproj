@@ -68,10 +68,17 @@
 				.cursor/rules/storage.mdc,
 				.cursor/rules/swiftui.mdc,
 				.cursor/rules/testing.mdc,
+				.cursor/settings.json,
 				.gitignore,
 				.swiftlint.yml,
+				.xcodesyncignore,
 				ADD_GOOGLE_SIGNIN_PACKAGE.md,
+				APPLE_SIGNIN_SETUP.md,
 				ARCHITECTURE.md,
+				buf.gen.yaml,
+				ClassNotes/Core/Networking/gRPC/Interceptors/GRPC_V2_INTERCEPTOR_MIGRATION.md,
+				ClassNotes/Core/Networking/gRPC/Interceptors/README.md,
+				ClassNotes/Core/Networking/gRPC/README.md,
 				"ClassNotes/Core/Services/BUNDLED-MODEL-SETUP.md",
 				"ClassNotes/Core/Services/WhisperKit-README.md",
 				ClassNotes/Lessons/PENCILKIT_INTEGRATION.md,
@@ -80,16 +87,27 @@
 				CURSOR_WORKFLOW.md,
 				download_official_google_logo.sh,
 				FIND_BUNDLE_ID.md,
+				fix_project.py,
 				generate_app_icons.py,
 				GoogleSignInSetup.md,
+				GRPC_SWIFT_2_MIGRATION.md,
+				GRPC_SWIFT_V2_MIGRATION_COMPLETE.md,
 				Info.plist,
 				LICENSE,
 				README.md,
 				requirements.txt,
 				"Scripts/check-build.sh",
+				"Scripts/generate-protos-simple.sh",
+				"Scripts/generate-protos-v2.sh",
+				"Scripts/generate-protos.sh",
+				"Scripts/generate-subscription-proto.sh.OLD",
+				"Scripts/install-grpc-tools.sh",
 				"Scripts/quick-start.sh",
 				"Scripts/run-tests.sh",
 				"Scripts/xcode-build.sh",
+				SIMULATOR_TESTING_GUIDE.md,
+				"WhisperKitModels/openai_whisper-medium/config.json",
+				"WhisperKitModels/openai_whisper-medium/generation_config.json",
 			);
 			target = 3F3163332DF3F09F00B3CA0B /* class-notes-frontend */;
 		};
@@ -309,6 +327,43 @@
 			knownRegions = (
 				en,
 				Base,
+				de,
+				he,
+				ar,
+				el,
+				ja,
+				es_MX,
+				nb,
+				es,
+				pt_BR,
+				da,
+				it,
+				pt_PT,
+				ms,
+				cs,
+				ko,
+				hu,
+				pl,
+				en_GB,
+				fr_CA,
+				fr,
+				fi,
+				id,
+				nl,
+				pt,
+				hr,
+				hi,
+				ca,
+				sv,
+				uk,
+				tr,
+				vi,
+				zh_TW,
+				ru,
+				zh_CN,
+				th,
+				sk,
+				ro,
 			);
 			mainGroup = 3F31632B2DF3F09F00B3CA0B;
 			minimizedProjectReferenceProxies = 1;
@@ -539,6 +594,11 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 18.4;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/class-notes-frontend/.build/checkouts/firebase-ios-sdk/Crashlytics/UnitTests/Data",
+					"$(PROJECT_DIR)/class-notes-frontend/.build/checkouts/firebase-ios-sdk/Crashlytics/UnitTests/FIRCLSMachO/machO_data",
+				);
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "Scriblo.class-notes-frontend";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -578,6 +638,11 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 18.4;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/class-notes-frontend/.build/checkouts/firebase-ios-sdk/Crashlytics/UnitTests/Data",
+					"$(PROJECT_DIR)/class-notes-frontend/.build/checkouts/firebase-ios-sdk/Crashlytics/UnitTests/FIRCLSMachO/machO_data",
+				);
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "Scriblo.class-notes-frontend";
 				PRODUCT_NAME = "$(TARGET_NAME)";

@@ -60,7 +60,7 @@ final class AuthenticationViewModel: ObservableObject {
         isAuthenticated = await authService.checkAuthenticationStatus()
         if isAuthenticated {
             // Since both ViewModel and authService are @MainActor, we can access directly
-            let user = await authService.currentUser
+            let user = authService.currentUser
             self.currentUser = user
         }
     }
@@ -98,7 +98,7 @@ final class AuthenticationViewModel: ObservableObject {
 
             isAuthenticated = true
             // Since both ViewModel and authService are @MainActor, we can access directly
-            let user = await authService.currentUser
+            let user = authService.currentUser
             self.currentUser = user
         } catch {
             handleError(error)

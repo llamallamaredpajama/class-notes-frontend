@@ -6,119 +6,104 @@ import OSLog
 
 /// Interceptor for handling authentication in gRPC requests
 /// Automatically adds auth tokens and handles token refresh
-struct AuthInterceptor: ClientInterceptor {
-    
+struct AuthInterceptor: ClientInterceptor, Sendable {
+
     // MARK: - Properties
-    
-    private let keychainService: KeychainService
+
     private let logger: OSLog
-    
+
     // MARK: - Initialization
-    
+
     init(
-        keychainService: KeychainService = KeychainService.shared,
         logger: OSLog = OSLog(subsystem: "com.classnotes", category: "Networking")
     ) {
-        self.keychainService = keychainService
         self.logger = logger
     }
-    
+
     // MARK: - ClientInterceptor Protocol
-    
+
     func intercept<Input: Sendable, Output: Sendable>(
         request: ClientRequest<Input>,
         context: ClientContext,
-        next: @Sendable (ClientRequest<Input>, ClientContext) async throws -> ClientResponse<Output>
+        next: @Sendable (
+            ClientRequest<Input>,
+            ClientContext
+        ) async throws -> ClientResponse<Output>
     ) async throws -> ClientResponse<Output> {
         
-        var modifiedRequest = request
+        // Collect headers to add
+        var headers: [(String, String)] = []
         
-        // Add authentication token if available
-        if let token = getStoredAuthToken() {
-            var metadata = request.metadata
-            metadata.addString(
-                "\(Constants.bearerPrefix)\(token)",
-                forKey: Constants.authorizationHeader
-            )
-            modifiedRequest = ClientRequest(
-                message: request.message,
-                metadata: metadata
-            )
-            
-            logger.info("Added auth token to request")
+        // Add existing metadata
+        for (key, values) in request.metadata {
+            for value in values {
+                headers.append((key, value))
+            }
         }
         
-        // Add user agent header
-        var metadata = modifiedRequest.metadata
-        metadata.addString(Constants.userAgent, forKey: Constants.userAgentHeader)
-        modifiedRequest = ClientRequest(
-            message: modifiedRequest.message,
-            metadata: metadata
-        )
-        
-        return try await next(modifiedRequest, context)
-    }
-    
-    func intercept<Input: Sendable, Output: Sendable>(
-        request: StreamingClientRequest<Input>,
-        context: ClientContext,
-        next: @Sendable (StreamingClientRequest<Input>, ClientContext) async throws -> StreamingClientResponse<Output>
-    ) async throws -> StreamingClientResponse<Output> {
-        
-        var modifiedRequest = request
-        
-        // Add authentication token if available
+        // Add auth token if available
         if let token = getStoredAuthToken() {
-            var metadata = request.metadata
-            metadata.addString(
-                "\(Constants.bearerPrefix)\(token)",
-                forKey: Constants.authorizationHeader
-            )
-            modifiedRequest = StreamingClientRequest(
-                metadata: metadata,
-                producer: request.producer
-            )
-            
-            logger.info("Added auth token to streaming request")
+            logger.info("Adding auth token to request")
+            headers.append((Constants.authorizationHeader, "\(Constants.bearerPrefix)\(token)"))
+        } else {
+            logger.debug("No auth token available for request")
         }
         
-        // Add user agent header
-        var metadata = modifiedRequest.metadata
-        metadata.addString(Constants.userAgent, forKey: Constants.userAgentHeader)
-        modifiedRequest = StreamingClientRequest(
-            metadata: metadata,
-            producer: modifiedRequest.producer
+        // Add User-Agent header
+        headers.append((Constants.userAgentHeader, Constants.userAgent))
+        
+        // Create new metadata with all headers
+        let newMetadata = Metadata(headers)
+        
+        // Create new request with updated metadata
+        let modifiedRequest = ClientRequest(
+            message: request.message,
+            metadata: newMetadata
         )
         
-        return try await next(modifiedRequest, context)
+        // Execute the request with modified headers
+        let response = try await next(modifiedRequest, context)
+        
+        // Check if we received a new auth token in the response
+        if let newTokenValues = response.metadata[Constants.authorizationHeader] {
+            // Get the first value if multiple are present
+            if let firstValue = newTokenValues.first {
+                if let newToken = extractTokenFromHeader(firstValue) {
+                    logger.info("Received new auth token in response, storing it")
+                    try storeAuthToken(newToken)
+                }
+            }
+        }
+        
+        return response
     }
-    
+
     // MARK: - Private Helper Methods
-    
+
     private func extractTokenFromHeader(_ headerValue: String) -> String? {
         if headerValue.hasPrefix(Constants.bearerPrefix) {
             return String(headerValue.dropFirst(Constants.bearerPrefix.count))
         }
         return nil
     }
-    
+
     private func getStoredAuthToken() -> String? {
-        return keychainService.loadString(key: "auth_token")
+        return KeychainService.shared.loadString(key: "auth_token")
     }
-    
+
     private func storeAuthToken(_ token: String) throws {
-        _ = keychainService.saveString(token, for: "auth_token")
+        _ = KeychainService.shared.saveString(token, for: "auth_token")
     }
-    
+
     private func removeStoredAuthToken() {
-        _ = keychainService.delete(key: "auth_token")
+        _ = KeychainService.shared.delete(key: "auth_token")
     }
 }
 
 // MARK: - Constants
 
-private extension AuthInterceptor {
-    enum Constants {
+extension AuthInterceptor {
+    fileprivate enum Constants {
         static let authorizationHeader = "authorization"
         static let userAgentHeader = "user-agent"
         static let bearerPrefix = "Bearer "
@@ -131,11 +116,11 @@ extension KeychainService {
     func getAuthToken() throws -> String? {
         return loadString(key: "auth_token")
     }
-    
+
     func setAuthToken(_ token: String) throws {
         _ = saveString(token, for: "auth_token")
     }
-    
+
     func deleteAuthToken() {
         _ = delete(key: "auth_token")
     }

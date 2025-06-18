@@ -4,7 +4,7 @@ import AVFoundation
 /// Example view demonstrating WhisperKit integration for audio recording and transcription
 struct WhisperKitExampleView: View {
     @StateObject private var whisperService = WhisperKitService()
-    @StateObject private var audioRecorder = AudioRecorder()
+    @StateObject private var audioRecorder = WhisperKitAudioRecorder()
     
     @State private var selectedModel = "medium"  // Using pre-bundled medium model
     @State private var showingModelPicker = false
@@ -225,7 +225,7 @@ struct WhisperKitExampleView: View {
 
 /// Simple audio recorder for demonstration purposes
 @MainActor
-class AudioRecorder: ObservableObject {
+class WhisperKitAudioRecorder: ObservableObject {
     private var audioRecorder: AVAudioRecorder?
     private var recordingURL: URL?
     

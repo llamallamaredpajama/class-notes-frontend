@@ -27,6 +27,9 @@ final class SubscriptionService: NSObject, ObservableObject {
     private let logger = OSLog.subscription
     private let baseURL = "https://api.classnotes.app"  // Will be configured from environment
 
+    private let grpcClient: GRPCClient
+    private let subscriptionClient: Classnotes_V1_SubscriptionService.Client
+
     // Product identifiers matching the Tier Management Guide
     enum ProductIdentifier: String, CaseIterable {
         case monthlyBasic = "com.classnotes.subscription.monthly.basic"
@@ -113,8 +116,22 @@ final class SubscriptionService: NSObject, ObservableObject {
 
     // MARK: - Initialization
 
-    private override init() {
-        super.init()
+    private init() {
+        Task {
+            self.grpcClient = await GRPCClientProvider.shared.makeGRPCClient()
+            self.subscriptionClient = Classnotes_V1_SubscriptionService.Client(
+                wrapping: grpcClient
+            )
+        }
+        
+        // Initialize with temporary client until async init completes
+        self.grpcClient = GRPCClient(
+            transport: EmptyTransport(),
+            interceptors: []
+        )
+        self.subscriptionClient = Classnotes_V1_SubscriptionService.Client(
+            wrapping: self.grpcClient
+        )
 
         // Start listening for transaction updates
         updateListenerTask = listenForTransactions()
@@ -251,17 +268,31 @@ final class SubscriptionService: NSObject, ObservableObject {
     private func validateReceipt(transaction: Transaction) async throws {
         logger.info("Validating receipt for transaction: \(transaction.id)")
 
-        // Get the App Store receipt data
-        guard let appStoreReceiptURL = Bundle.main.appStoreReceiptURL,
-            FileManager.default.fileExists(atPath: appStoreReceiptURL.path)
-        else {
-            // For iOS 18.0+, you should use AppTransaction and Transaction from StoreKit
-            // This is a temporary fallback for older iOS versions
-            throw SubscriptionError.receiptNotFound
+        // For iOS 18.0+, use StoreKit 2 transaction data
+        // The transaction itself contains all verification data needed
+        var receiptString = ""
+        
+        if #available(iOS 15.0, *) {
+            // Use StoreKit 2 approach - transaction already contains verification data
+            // Convert transaction data to a format compatible with backend
+            if let jsonData = try? JSONEncoder().encode(transaction),
+               let jsonString = String(data: jsonData, encoding: .utf8) {
+                receiptString = Data(jsonString.utf8).base64EncodedString()
+            } else {
+                // Fallback to transaction ID if encoding fails
+                receiptString = Data(String(transaction.id).utf8).base64EncodedString()
+            }
+        } else {
+            // Legacy approach for older iOS versions
+            guard let appStoreReceiptURL = Bundle.main.appStoreReceiptURL,
+                FileManager.default.fileExists(atPath: appStoreReceiptURL.path)
+            else {
+                throw SubscriptionError.receiptNotFound
+            }
+            
+            let receiptData = try Data(contentsOf: appStoreReceiptURL)
+            receiptString = receiptData.base64EncodedString()
         }
-
-        let receiptData = try Data(contentsOf: appStoreReceiptURL)
-        let receiptString = receiptData.base64EncodedString()
 
         // Create validation request
         let request = ClassNotes_V1_ValidateReceiptRequest.with {
@@ -515,6 +546,19 @@ extension SwiftProtobuf.Google_Protobuf_Timestamp {
     
     var date: Date {
         return Date(timeIntervalSince1970: Double(seconds) + Double(nanos) / 1_000_000_000)
+    }
+}
+
+// MARK: - Empty Transport
+
+/// Temporary transport for initialization
+private struct EmptyTransport: ClientTransport {
+    func connect(lazily: Bool) async throws -> any Streaming {
+        throw GRPCError.transportNotInitialized
+    }
+    
+    func close() async {
+        // No-op
     }
 }
 

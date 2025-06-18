@@ -292,7 +292,7 @@ struct ChatSupportView: View {
         messages.append(ChatMessage(text: messageText, isUser: true))
 
         // Simulate support response
-        let userMessage = messageText
+        let _ = messageText
         messageText = ""
 
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {

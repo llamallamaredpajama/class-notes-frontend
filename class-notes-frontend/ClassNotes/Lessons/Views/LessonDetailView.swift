@@ -435,24 +435,19 @@ struct LessonDetailView: View {
 
 // MARK: - Supporting Views
 
-/// Share sheet wrapper for UIKit
-struct ShareSheet: UIViewControllerRepresentable {
-    let items: [Any]
-    
-    func makeUIViewController(context: Context) -> UIActivityViewController {
-        UIActivityViewController(activityItems: items, applicationActivities: nil)
-    }
-    
-    func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
-}
+// ShareSheet is defined in DrawingsGalleryView.swift to avoid redeclaration
 
 // MARK: - Preview
 
 #Preview {
     NavigationStack {
-        if let sampleLesson = MockData.sampleLessons.first {
-            LessonDetailView(lesson: sampleLesson)
-        }
+        let sampleLesson = Lesson(
+            title: "Introduction to SwiftUI",
+            date: Date(),
+            duration: 3600,
+            transcript: "Welcome to SwiftUI fundamentals. Today we'll explore the declarative syntax and learn how to build beautiful user interfaces."
+        )
+        LessonDetailView(lesson: sampleLesson)
     }
     .modelContainer(PersistenceController.preview.container)
 } 

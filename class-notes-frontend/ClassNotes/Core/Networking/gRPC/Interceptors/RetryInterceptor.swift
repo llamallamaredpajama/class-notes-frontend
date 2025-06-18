@@ -8,21 +8,23 @@ import OSLog
 struct RetryInterceptor: ClientInterceptor, Sendable {
     
     // MARK: - Properties
+    
     let maxRetries: Int
     let retryableStatusCodes: Set<RPCError.Code>
     let initialBackoff: TimeInterval
     let backoffMultiplier: Double
     let maxBackoff: TimeInterval
-    private let logger: os.Logger
+    private let logger: OSLog
     
     // MARK: - Initialization
+    
     init(
         maxRetries: Int = 3,
         retryableStatusCodes: Set<RPCError.Code> = [.unavailable, .deadlineExceeded, .resourceExhausted],
         initialBackoff: TimeInterval = 0.1,
         backoffMultiplier: Double = 2.0,
         maxBackoff: TimeInterval = 5.0,
-        logger: os.Logger = os.Logger(subsystem: "com.classnotes", category: "Networking")
+        logger: OSLog = OSLog(subsystem: "com.classnotes", category: "Networking")
     ) {
         self.maxRetries = maxRetries
         self.retryableStatusCodes = retryableStatusCodes
@@ -33,22 +35,22 @@ struct RetryInterceptor: ClientInterceptor, Sendable {
     }
     
     // MARK: - ClientInterceptor Implementation
-    @Sendable
+    
     func intercept<Input: Sendable, Output: Sendable>(
-        request: StreamingClientRequest<Input>,
+        request: ClientRequest<Input>,
         context: ClientContext,
         next: @Sendable (
-            StreamingClientRequest<Input>,
+            ClientRequest<Input>,
             ClientContext
-        ) async throws -> StreamingClientResponse<Output>
-    ) async throws -> StreamingClientResponse<Output> {
+        ) async throws -> ClientResponse<Output>
+    ) async throws -> ClientResponse<Output> {
         var lastError: Error?
         var currentBackoff = initialBackoff
         
         for attempt in 0...maxRetries {
             do {
                 if attempt > 0 {
-                    logger.info("Retrying request (attempt \(attempt + 1)/\(maxRetries + 1))")
+                    logger.info("Retrying request (attempt \(attempt + 1)/\(maxRetries + 1)) for \(context.descriptor.fullyQualifiedMethod)")
                     try await Task.sleep(nanoseconds: UInt64(currentBackoff * 1_000_000_000))
                 }
                 
@@ -66,50 +68,66 @@ struct RetryInterceptor: ClientInterceptor, Sendable {
                 
                 // Check if error is retryable
                 if !isRetryable(error: error) {
-                    logger.debug("Non-retryable error: \(error)")
+                    logger.debug("Non-retryable error for \(context.descriptor.fullyQualifiedMethod): \(error)")
                     throw error
                 }
                 
                 // Check if we've exhausted retries
                 if attempt == maxRetries {
-                    logger.error("Max retries (\(maxRetries)) exceeded")
+                    logger.error("Max retries (\(maxRetries)) exceeded for \(context.descriptor.fullyQualifiedMethod)")
                     throw error
                 }
                 
                 // Log retry attempt
-                logger.warning("Retryable error: \(error.code) - \(error.message)")
+                logger.warning("Retryable error for \(context.descriptor.fullyQualifiedMethod): \(error.code) - \(error.message)")
                 
                 // Update backoff for next attempt
                 currentBackoff = min(currentBackoff * backoffMultiplier, maxBackoff)
                 
             } catch {
                 // Non-RPC errors are not retryable
-                logger.debug("Non-RPC error: \(error)")
+                logger.error("Non-RPC error (not retryable) for \(context.descriptor.fullyQualifiedMethod): \(error)")
                 throw error
             }
         }
         
-        // This should never be reached, but just in case
-        throw lastError ?? RPCError(code: .unknown, message: "Retry logic error")
+        // This should never be reached due to the logic above
+        throw lastError ?? RetryError.exhaustedRetries
     }
     
     // MARK: - Private Methods
+    
     private func isRetryable(error: RPCError) -> Bool {
         // Check if the error code is in our retryable set
         guard retryableStatusCodes.contains(error.code) else {
             return false
         }
         
-        // Additional checks could be added here, such as:
-        // - Checking if the error message indicates a transient failure
-        // - Checking if we're within a deadline
-        // - Checking circuit breaker status
+        // Check for retry-after header in metadata
+        if let retryAfterValues = error.metadata["retry-after"],
+           let retryAfterValue = retryAfterValues.first {
+            logger.debug("Server requested retry after: \(retryAfterValue)")
+        }
         
         return true
     }
 }
 
+// MARK: - Error Types
+
+enum RetryError: Error, Sendable {
+    case exhaustedRetries
+    
+    var localizedDescription: String {
+        switch self {
+        case .exhaustedRetries:
+            return "Exhausted retry attempts"
+        }
+    }
+}
+
 // MARK: - Retry Configuration
+
 extension RetryInterceptor {
     /// Default retry configuration for production use
     static var `default`: RetryInterceptor {
@@ -125,7 +143,7 @@ extension RetryInterceptor {
                 .deadlineExceeded,
                 .resourceExhausted,
                 .aborted,
-                .internalError
+                .internal
             ],
             initialBackoff: 0.05,
             backoffMultiplier: 1.5,
@@ -141,6 +159,14 @@ extension RetryInterceptor {
             initialBackoff: 0.5,
             backoffMultiplier: 2.0,
             maxBackoff: 2.0
+        )
+    }
+    
+    /// No retry configuration for critical operations
+    static var noRetry: RetryInterceptor {
+        RetryInterceptor(
+            maxRetries: 0,
+            retryableStatusCodes: []
         )
     }
 }

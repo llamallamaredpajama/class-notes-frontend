@@ -8,6 +8,21 @@
 import Foundation
 import SwiftData
 
+// MARK: - Sync Status
+enum SyncStatus: String, Codable {
+    case synced
+    case syncing
+    case notSynced
+    case error
+}
+
+// MARK: - Processing Status
+enum ProcessingStatus: String, Codable {
+    case processing
+    case completed
+    case failed
+}
+
 /// Represents a lesson in the app
 @Model
 final class Lesson {
@@ -53,6 +68,21 @@ final class Lesson {
     /// Sync status of the lesson
     var syncStatus: SyncStatus
     
+    /// File size in bytes
+    var fileSize: Int64?
+    
+    /// Summary text of the lesson
+    var summary: String
+    
+    /// Whether the lesson has audio recording
+    var hasAudio: Bool
+    
+    /// Whether the lesson has PDF
+    var hasPDF: Bool
+    
+    /// Processing status for AI analysis
+    var processingStatus: ProcessingStatus?
+    
     // MARK: - Relationships
     
     /// The course this lesson belongs to
@@ -69,6 +99,10 @@ final class Lesson {
     /// Drawing canvases for this lesson
     @Relationship(deleteRule: .cascade)
     var drawingCanvases: [DrawingCanvas]
+    
+    /// Scanned documents associated with this lesson
+    @Relationship(deleteRule: .cascade)
+    var scannedDocuments: [ScannedDocument]?
     
     // MARK: - Initialization
     
@@ -98,20 +132,44 @@ final class Lesson {
         self.audioURL = audioURL
         self.pdfURL = pdfURL
         self.syncStatus = syncStatus
+        self.fileSize = nil
+        self.summary = ""
+        self.hasAudio = audioURL != nil
+        self.hasPDF = pdfURL != nil
+        self.processingStatus = nil
         self.course = nil
         self.notes = []
         self.audioRecordings = []
         self.drawingCanvases = []
+        self.scannedDocuments = []
     }
 }
 
-// MARK: - Sync Status
-enum SyncStatus: String, Codable {
-    case synced
-    case syncing
-    case notSynced
-    case error
+// MARK: - Scanned Document Model (placeholder)
+@Model
+final class ScannedDocument {
+    @Attribute(.unique) var id: UUID
+    var title: String
+    var createdAt: Date
+    var pageCount: Int
+    var fileURL: URL?
+    
+    init(title: String, pageCount: Int = 1) {
+        self.id = UUID()
+        self.title = title
+        self.createdAt = Date()
+        self.pageCount = pageCount
+        self.fileURL = nil
+    }
 }
+
+// MARK: - Note Model (Note: The full Note model is defined in Note.swift)
+
+// MARK: - Audio Recording Model (Note: The full AudioRecording model is defined in AudioRecording.swift)
+
+
+
+
 
 // MARK: - Extensions
 
@@ -172,14 +230,9 @@ extension Lesson {
         return transcript
     }
     
-    /// Check if lesson has audio
-    var hasAudio: Bool {
-        audioURL != nil
-    }
-    
-    /// Check if lesson has PDF
-    var hasPDF: Bool {
-        pdfURL != nil
+    /// Computed property for drawings (alias for drawingCanvases)
+    var drawings: [DrawingCanvas]? {
+        return drawingCanvases.isEmpty ? nil : drawingCanvases
     }
 }
 

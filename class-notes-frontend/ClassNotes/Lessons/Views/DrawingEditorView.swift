@@ -197,9 +197,11 @@ import SwiftUI
                 canvasData: data,
                 width: canvasView.bounds.width,
                 height: canvasView.bounds.height,
-                backgroundColor: backgroundColor.toHex() ?? "#FFFFFF",
-                lesson: lesson
+                backgroundColor: backgroundColor.toHex() ?? "#FFFFFF"
             )
+            
+            // Set the lesson relationship
+            newCanvas.lesson = lesson
 
             if let thumbnail = generateThumbnail() {
                 newCanvas.thumbnailData = thumbnail
@@ -347,23 +349,29 @@ import SwiftUI
 
 #Preview("Drawing Editor - New Canvas") {
     NavigationStack {
-        if let sampleLesson = MockData.sampleLessons.first {
-            DrawingEditorView(lesson: sampleLesson)
-        }
+        let sampleLesson = Lesson(
+            title: "Introduction to SwiftUI",
+            date: Date(),
+            duration: 3600,
+            transcript: "Welcome to SwiftUI fundamentals..."
+        )
+        DrawingEditorView(lesson: sampleLesson)
     }
     .modelContainer(PersistenceController.preview.container)
 }
 
 #Preview("Drawing Editor - Existing Canvas") {
     NavigationStack {
-        if let sampleLesson = MockData.sampleLessons.first {
-            let existingCanvas = DrawingCanvas(
-                title: "Sample Drawing",
-                canvasData: Data(),
-                lesson: sampleLesson
-            )
-            DrawingEditorView(lesson: sampleLesson, existingCanvas: existingCanvas)
-        }
+        let sampleLesson = Lesson(
+            title: "Introduction to SwiftUI",
+            date: Date(),
+            duration: 3600,
+            transcript: "Welcome to SwiftUI fundamentals..."
+        )
+        let existingCanvas = DrawingCanvas(
+            title: "Sample Drawing"
+        )
+        DrawingEditorView(lesson: sampleLesson, existingCanvas: existingCanvas)
     }
     .modelContainer(PersistenceController.preview.container)
 }

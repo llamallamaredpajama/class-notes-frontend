@@ -89,43 +89,46 @@
         var body: some View {
             NavigationStack {
                 List {
-                    Section("Lesson Components") {
+                    Section {
                         NavigationLink("Lesson Card") {
-                            LessonCardGalleryView()
+                            Text("Lesson Card Gallery")
                                 .navigationTitle("Lesson Cards")
                         }
 
                         NavigationLink("Lesson Detail") {
-                            LessonDetailView(lesson: MockData.sampleLesson)
+                            Text("Lesson Detail View")
+                                .navigationTitle("Lesson Detail")
                         }
+                    } header: {
+                        Text("Lesson Components")
                     }
 
-                    Section("Authentication Components") {
+                    Section {
                         NavigationLink("Sign In View") {
-                            ClassNotesSignInView()
-                                .environmentObject(
-                                    AuthenticationViewModel(
-                                        authService: MockAuthenticationService())
-                                )
-                                .previewAsComponent()
+                            Text("Sign In View")
+                                .navigationTitle("Sign In")
                         }
 
                         NavigationLink("User Profile") {
-                            UserProfileView(user: MockData.sampleUser)
-                                .previewAsComponent()
+                            Text("User Profile View")
+                                .navigationTitle("Profile")
                         }
+                    } header: {
+                        Text("Authentication Components")
                     }
 
-                    Section("Common UI Elements") {
+                    Section {
                         NavigationLink("Loading States") {
-                            LoadingStatesView()
+                            Text("Loading States")
                                 .navigationTitle("Loading States")
                         }
 
                         NavigationLink("Error States") {
-                            ErrorStatesView()
+                            Text("Error States")
                                 .navigationTitle("Error States")
                         }
+                    } header: {
+                        Text("Common UI Elements")
                     }
                 }
                 .navigationTitle("Component Gallery")
@@ -142,13 +145,15 @@
         var body: some View {
             NavigationStack {
                 Form {
-                    Section("Debug Options") {
+                    Section {
                         Toggle("Show Debug Overlay", isOn: $showDebugOverlay)
                         Toggle("Show Console Logs", isOn: $showLogs)
                         Toggle("Use Mock Data", isOn: $useMockData)
+                    } header: {
+                        Text("Debug Options")
                     }
 
-                    Section("Device Info") {
+                    Section {
                         #if canImport(UIKit)
                             LabeledContent("Device", value: UIDevice.current.name)
                             LabeledContent("iOS Version", value: UIDevice.current.systemVersion)
@@ -159,9 +164,11 @@
                             "App Version",
                             value: Bundle.main.infoDictionary?["CFBundleShortVersionString"]
                                 as? String ?? "Unknown")
+                    } header: {
+                        Text("Device Info")
                     }
 
-                    Section("Actions") {
+                    Section {
                         Button("Clear Cache") {
                             print("Clearing cache...")
                         }
@@ -171,6 +178,8 @@
                             print("Resetting app state...")
                         }
                         .foregroundColor(.red)
+                    } header: {
+                        Text("Actions")
                     }
                 }
                 .navigationTitle("Debug Settings")
@@ -182,7 +191,7 @@
     struct LessonListView: View {
         var body: some View {
             List(MockData.sampleLessons) { lesson in
-                LessonCard(lesson: lesson) {}
+                PreviewLessonCard(lesson: lesson) {}
             }
             .navigationTitle("Lessons")
         }
@@ -190,6 +199,29 @@
 
     struct LessonCard: View {
         let lesson: Lesson
+        let action: () -> Void
+
+        var body: some View {
+            VStack(alignment: .leading, spacing: 8) {
+                Text(lesson.title)
+                    .font(.headline)
+                Text(lesson.date, style: .date)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                Text("Duration: \(lesson.duration / 60) minutes")
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+            }
+            .padding()
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Color(.systemGray6))
+            .cornerRadius(10)
+            .onTapGesture(perform: action)
+        }
+    }
+
+    struct PreviewLessonCard: View {
+        let lesson: MockData.PreviewLesson
         let action: () -> Void
 
         var body: some View {
@@ -230,7 +262,7 @@
         }
     }
 
-    struct ErrorView: View {
+    struct DebugErrorView: View {
         let error: Error
         let retry: () -> Void
 
@@ -261,7 +293,7 @@
             ScrollView {
                 VStack(spacing: 20) {
                     ForEach(MockData.sampleLessons) { lesson in
-                        LessonCard(lesson: lesson) {
+                        PreviewLessonCard(lesson: lesson) {
                             print("Tapped lesson: \(lesson.title)")
                         }
                         .previewAsComponent()
@@ -289,7 +321,7 @@
     struct ErrorStatesView: View {
         var body: some View {
             VStack(spacing: 20) {
-                ErrorView(error: MockData.sampleError) {
+                DebugErrorView(error: MockData.sampleError) {
                     print("Retry tapped")
                 }
                 .previewAsComponent()

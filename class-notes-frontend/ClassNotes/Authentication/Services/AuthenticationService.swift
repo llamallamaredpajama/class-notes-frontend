@@ -15,7 +15,8 @@ final class AuthenticationService: AuthenticationServiceProtocol {
     private let keychainService: KeychainServiceProtocol
     private let modelContext: ModelContext?
 
-    private var _currentUser: User?
+    private var _currentUser: AppUser?
+    private var _isAuthenticated: Bool = false
 
     init(
         googleService: GoogleSignInServiceProtocol,
@@ -27,23 +28,24 @@ final class AuthenticationService: AuthenticationServiceProtocol {
         self.appleService = appleService
         self.keychainService = keychainService
         self.modelContext = modelContext
+        
+        // Initialize authentication status
+        Task {
+            _isAuthenticated = await checkAuthenticationStatus()
+            if _isAuthenticated {
+                await loadCurrentUser()
+            }
+        }
     }
 
     // MARK: - AuthenticationServiceProtocol
 
     var isAuthenticated: Bool {
-        get async {
-            await checkAuthenticationStatus()
-        }
+        return _isAuthenticated
     }
 
-    var currentUser: User? {
-        get async {
-            if _currentUser == nil {
-                await loadCurrentUser()
-            }
-            return _currentUser
-        }
+    var currentUser: AppUser? {
+        return _currentUser
     }
 
     func signIn() async throws {
@@ -79,6 +81,7 @@ final class AuthenticationService: AuthenticationServiceProtocol {
             }
 
             _currentUser = user
+            _isAuthenticated = true
         } catch {
             throw AppError(error)
         }
@@ -112,6 +115,7 @@ final class AuthenticationService: AuthenticationServiceProtocol {
             }
 
             _currentUser = user
+            _isAuthenticated = true
         } catch {
             throw AppError(error)
         }
@@ -134,6 +138,7 @@ final class AuthenticationService: AuthenticationServiceProtocol {
 
         // Clear current user
         _currentUser = nil
+        _isAuthenticated = false
     }
 
     func checkAuthenticationStatus() async -> Bool {
@@ -201,17 +206,17 @@ final class AuthenticationService: AuthenticationServiceProtocol {
 @MainActor
 final class MockAuthenticationService: AuthenticationServiceProtocol {
     private var mockIsAuthenticated = false
-    private var mockUser: User?
+    private var mockUser: AppUser?
 
     /// Simulated delay for authentication operations (in seconds)
     private let simulatedDelay: TimeInterval = 0.5
 
     var isAuthenticated: Bool {
-        get async { mockIsAuthenticated }
+        return mockIsAuthenticated
     }
 
-    var currentUser: User? {
-        get async { mockUser }
+    var currentUser: AppUser? {
+        return mockUser
     }
 
     func signIn() async throws {

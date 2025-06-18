@@ -101,7 +101,7 @@ final class PersistenceController {
             let course = Course(
                 name: "Mathematics 101",
                 instructor: "Dr. Smith",
-                color: "#FF6B6B"
+                color: .red
             )
             context.insert(course)
             

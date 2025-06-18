@@ -185,7 +185,17 @@ final class PushNotificationService: NSObject {
     /// Update badge count
     func updateBadgeCount(_ count: Int) {
         Task { @MainActor in
-            UIApplication.shared.applicationIconBadgeNumber = count
+            // Use the modern API for iOS 17+
+            if #available(iOS 17.0, *) {
+                UNUserNotificationCenter.current().setBadgeCount(count) { error in
+                    if let error = error {
+                        OSLog.notifications.error("Failed to update badge count: \(error)")
+                    }
+                }
+            } else {
+                // Fallback for older iOS versions
+                UIApplication.shared.applicationIconBadgeNumber = count
+            }
         }
     }
     
@@ -308,7 +318,7 @@ final class PushNotificationService: NSObject {
 // MARK: - UNUserNotificationCenterDelegate
 
 extension PushNotificationService: UNUserNotificationCenterDelegate {
-    func userNotificationCenter(
+    nonisolated func userNotificationCenter(
         _ center: UNUserNotificationCenter,
         willPresent notification: UNNotification,
         withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
@@ -317,21 +327,23 @@ extension PushNotificationService: UNUserNotificationCenterDelegate {
         completionHandler([.banner, .sound, .badge])
     }
     
-    func userNotificationCenter(
+    nonisolated func userNotificationCenter(
         _ center: UNUserNotificationCenter,
         didReceive response: UNNotificationResponse,
         withCompletionHandler completionHandler: @escaping () -> Void
     ) {
         let content = response.notification.request.content
         
-        // Handle notification action
-        if let action = NotificationAction(rawValue: response.actionIdentifier) {
-            handleNotificationAction(action, content: content)
-        } else if response.actionIdentifier == UNNotificationDefaultActionIdentifier {
-            // Handle tap on notification
-            if let type = content.userInfo["type"] as? String,
-               let handler = notificationHandlers[type] {
-                handler(content)
+        Task { @MainActor in
+            // Handle notification action
+            if let action = NotificationAction(rawValue: response.actionIdentifier) {
+                handleNotificationAction(action, content: content)
+            } else if response.actionIdentifier == UNNotificationDefaultActionIdentifier {
+                // Handle tap on notification
+                if let type = content.userInfo["type"] as? String,
+                   let handler = notificationHandlers[type] {
+                    handler(content)
+                }
             }
         }
         
@@ -342,17 +354,19 @@ extension PushNotificationService: UNUserNotificationCenterDelegate {
 // MARK: - MessagingDelegate
 
 extension PushNotificationService: MessagingDelegate {
-    func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
-        self.fcmToken = fcmToken
-        
-        OSLog.notifications.info("FCM token received", metadata: [
-            "tokenPrefix": String(fcmToken?.prefix(10) ?? "")
-        ])
-        
-        // Send token to backend
-        if let token = fcmToken {
-            Task {
-                await sendTokenToBackend(token)
+    nonisolated func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
+        Task { @MainActor in
+            self.fcmToken = fcmToken
+            
+            OSLog.notifications.info("FCM token received", metadata: [
+                "tokenPrefix": String(fcmToken?.prefix(10) ?? "")
+            ])
+            
+            // Send token to backend
+            if let token = fcmToken {
+                Task {
+                    await sendTokenToBackend(token)
+                }
             }
         }
     }
