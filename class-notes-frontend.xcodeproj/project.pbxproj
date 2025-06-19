@@ -10,9 +10,9 @@
 		3F27EE852E01110200CDB10B /* GRPCCodeGen in Frameworks */ = {isa = PBXBuildFile; productRef = 3F27EE842E01110200CDB10B /* GRPCCodeGen */; };
 		3F31637B2DF48B2700B3CA0B /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 3F31637A2DF48B2700B3CA0B /* GoogleSignIn */; };
 		3F31637D2DF48B2700B3CA0B /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 3F31637C2DF48B2700B3CA0B /* GoogleSignInSwift */; };
-		3F76076C2E00FDF900A04914 /* GRPCNIOTransportHTTP2 in Frameworks */ = {isa = PBXBuildFile; productRef = 3F76076B2E00FDF900A04914 /* GRPCNIOTransportHTTP2 */; };
-		3F76076F2E00FE2800A04914 /* GRPCProtobuf in Frameworks */ = {isa = PBXBuildFile; productRef = 3F76076E2E00FE2800A04914 /* GRPCProtobuf */; };
+		3F76076D2E01002300A04914 /* GRPCProtobuf in Frameworks */ = {isa = PBXBuildFile; productRef = 3F76076C2E01002300A04914 /* GRPCProtobuf */; };
 		3F7607722E01000600A04914 /* GRPCCore in Frameworks */ = {isa = PBXBuildFile; productRef = 3F7607712E01000600A04914 /* GRPCCore */; };
+		3F7607732E01000600A04914 /* GRPCNIOTransportHTTP2 in Frameworks */ = {isa = PBXBuildFile; productRef = 3F7607742E01000600A04914 /* GRPCNIOTransportHTTP2 */; };
 		3F7F2AA72E011E2F00C6329A /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = 3F7F2AA62E011E2F00C6329A /* FirebaseMessaging */; };
 		3F7F2AA92E011F5B00C6329A /* FirebaseAI in Frameworks */ = {isa = PBXBuildFile; productRef = 3F7F2AA82E011F5B00C6329A /* FirebaseAI */; };
 		3F7F2AAB2E011F5B00C6329A /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 3F7F2AAA2E011F5B00C6329A /* FirebaseAnalytics */; };
@@ -141,8 +141,6 @@
 			files = (
 				3F7F2AA72E011E2F00C6329A /* FirebaseMessaging in Frameworks */,
 				3F7F2AAF2E011F5B00C6329A /* FirebaseAppCheck in Frameworks */,
-				3F76076F2E00FE2800A04914 /* GRPCProtobuf in Frameworks */,
-				3F76076C2E00FDF900A04914 /* GRPCNIOTransportHTTP2 in Frameworks */,
 				3FF0E69C2DF7E18C00E45E1E /* WhisperKit in Frameworks */,
 				3F7F2AB52E011F5B00C6329A /* FirebaseFirestore in Frameworks */,
 				3F7F2AB12E011F5B00C6329A /* FirebaseAuth in Frameworks */,
@@ -159,6 +157,8 @@
 				3F7F2ABD2E011F5B00C6329A /* FirebaseVertexAI in Frameworks */,
 				3F31637D2DF48B2700B3CA0B /* GoogleSignInSwift in Frameworks */,
 				3F7607722E01000600A04914 /* GRPCCore in Frameworks */,
+				3F7607732E01000600A04914 /* GRPCNIOTransportHTTP2 in Frameworks */,
+				3F76076D2E01002300A04914 /* GRPCProtobuf in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -231,9 +231,8 @@
 				3F31637C2DF48B2700B3CA0B /* GoogleSignInSwift */,
 				3FF0E69B2DF7E18C00E45E1E /* WhisperKit */,
 				3FB242182DFE66AB00641883 /* SwiftProtobuf */,
-				3F76076B2E00FDF900A04914 /* GRPCNIOTransportHTTP2 */,
-				3F76076E2E00FE2800A04914 /* GRPCProtobuf */,
 				3F7607712E01000600A04914 /* GRPCCore */,
+				3F76076C2E01002300A04914 /* GRPCProtobuf */,
 				3F27EE842E01110200CDB10B /* GRPCCodeGen */,
 				3F7F2AA62E011E2F00C6329A /* FirebaseMessaging */,
 				3F7F2AA82E011F5B00C6329A /* FirebaseAI */,
@@ -372,9 +371,8 @@
 				3F8C8F812DF7DBEB0094D388 /* XCRemoteSwiftPackageReference "KeychainAccess" */,
 				3F8C8F822DF7DC500094D388 /* XCRemoteSwiftPackageReference "WhisperKit" */,
 				3FB242172DFE66AB00641883 /* XCRemoteSwiftPackageReference "swift-protobuf" */,
-				3F76076A2E00FDF900A04914 /* XCRemoteSwiftPackageReference "grpc-swift-nio-transport" */,
-				3F76076D2E00FE2800A04914 /* XCRemoteSwiftPackageReference "grpc-swift-protobuf" */,
 				3F7607702E01000600A04914 /* XCRemoteSwiftPackageReference "grpc-swift-2" */,
+				3F76076A2E00FDF900A04914 /* XCRemoteSwiftPackageReference "grpc-swift-nio-transport" */,
 				3F7F2AA52E011E2E00C6329A /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 			);
 			preferredProjectObjectVersion = 77;
@@ -791,14 +789,7 @@
 				minimumVersion = 2.0.0;
 			};
 		};
-		3F76076D2E00FE2800A04914 /* XCRemoteSwiftPackageReference "grpc-swift-protobuf" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/grpc/grpc-swift-protobuf";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 2.0.0;
-			};
-		};
+
 		3F7607702E01000600A04914 /* XCRemoteSwiftPackageReference "grpc-swift-2" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/grpc/grpc-swift-2.git";
@@ -857,20 +848,20 @@
 			package = 3F3163792DF48B2700B3CA0B /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
 			productName = GoogleSignInSwift;
 		};
-		3F76076B2E00FDF900A04914 /* GRPCNIOTransportHTTP2 */ = {
+		3F76076C2E01002300A04914 /* GRPCProtobuf */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 3F76076A2E00FDF900A04914 /* XCRemoteSwiftPackageReference "grpc-swift-nio-transport" */;
-			productName = GRPCNIOTransportHTTP2;
-		};
-		3F76076E2E00FE2800A04914 /* GRPCProtobuf */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 3F76076D2E00FE2800A04914 /* XCRemoteSwiftPackageReference "grpc-swift-protobuf" */;
+			package = 3F7607702E01000600A04914 /* XCRemoteSwiftPackageReference "grpc-swift-2" */;
 			productName = GRPCProtobuf;
 		};
 		3F7607712E01000600A04914 /* GRPCCore */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 3F7607702E01000600A04914 /* XCRemoteSwiftPackageReference "grpc-swift-2" */;
 			productName = GRPCCore;
+		};
+		3F7607742E01000600A04914 /* GRPCNIOTransportHTTP2 */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3F76076A2E00FDF900A04914 /* XCRemoteSwiftPackageReference "grpc-swift-nio-transport" */;
+			productName = GRPCNIOTransportHTTP2;
 		};
 		3F7F2AA62E011E2F00C6329A /* FirebaseMessaging */ = {
 			isa = XCSwiftPackageProductDependency;

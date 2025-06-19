@@ -103,9 +103,9 @@ struct RetryInterceptor: ClientInterceptor, Sendable {
             return false
         }
         
-        // Check for retry-after header in metadata
-        if let retryAfterValues = error.metadata["retry-after"],
-           let retryAfterValue = retryAfterValues.first {
+        // Fix: Check for retry-after header in metadata correctly
+        let retryAfterValues = error.metadata["retry-after"]
+        if !retryAfterValues.isEmpty, let retryAfterValue = retryAfterValues.first {
             logger.debug("Server requested retry after: \(retryAfterValue)")
         }
         
@@ -142,8 +142,8 @@ extension RetryInterceptor {
                 .unavailable,
                 .deadlineExceeded,
                 .resourceExhausted,
-                .aborted,
-                .internal
+                .aborted
+                // Removed .internal as it doesn't exist in gRPC Swift v2
             ],
             initialBackoff: 0.05,
             backoffMultiplier: 1.5,

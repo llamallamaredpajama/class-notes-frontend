@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# generate-protos-simple.sh
-# Simple script to generate Swift code from proto files for grpc-swift-2
+# Simple gRPC-Swift v2 Proto Generation Script
+# This script generates Swift protobuf and gRPC client code from proto files
 
 set -e
 
@@ -11,82 +11,86 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
-echo -e "${GREEN}Starting proto generation for grpc-swift-2...${NC}"
-
-# Paths
+# Script directory
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-FRONTEND_ROOT="$( cd "$SCRIPT_DIR/.." && pwd )"
-OUTPUT_DIR="$FRONTEND_ROOT/ClassNotes/Core/Networking/gRPC/Generated"
-PROTO_DIR="$FRONTEND_ROOT/ClassNotes/Core/Networking/gRPC/Protos"
+FRONTEND_DIR="$( cd "$SCRIPT_DIR/.." && pwd )"
+PROJECT_ROOT="/Users/jeremy/Code/class-notes-project"
+DEVOPS_DIR="$PROJECT_ROOT/classnotes-devops"
+
+echo -e "${GREEN}Simple gRPC-Swift v2 Proto Generation${NC}"
+echo "Frontend directory: $FRONTEND_DIR"
+echo "DevOps directory: $DEVOPS_DIR"
+
+# Check if buf is installed
+if ! command -v buf &> /dev/null; then
+    echo -e "${RED}Error: buf is not installed${NC}"
+    echo "Install buf from: https://docs.buf.build/installation"
+    exit 1
+fi
 
 # Create output directory if it doesn't exist
+OUTPUT_DIR="$FRONTEND_DIR/ClassNotes/Core/Networking/gRPC/Generated"
 mkdir -p "$OUTPUT_DIR"
 
-# Check if protoc is installed
-if ! command -v protoc &> /dev/null; then
-    echo -e "${RED}protoc is not installed. Please run: brew install protobuf${NC}"
-    exit 1
+# Clean existing generated files
+echo -e "${YELLOW}Cleaning existing generated files...${NC}"
+rm -rf "$OUTPUT_DIR"/*.swift
+
+# Change to DevOps directory where proto files are located
+cd "$DEVOPS_DIR"
+
+# Generate proto files using the DevOps proto directory
+echo -e "${GREEN}Generating Swift protobuf and gRPC code from DevOps protos...${NC}"
+
+# Use buf to generate with the frontend's buf.gen.yaml
+if [ -f "proto-management/proto" ]; then
+    cd proto-management
 fi
 
-# Check if swift-protobuf plugin is installed
-if ! command -v protoc-gen-swift &> /dev/null; then
-    echo -e "${RED}protoc-gen-swift is not installed. Please run: brew install swift-protobuf${NC}"
-    exit 1
-fi
+buf generate proto --template "$FRONTEND_DIR/buf.gen.yaml"
 
-# Check if grpc-swift plugin is installed
-if ! command -v protoc-gen-grpc-swift &> /dev/null; then
-    echo -e "${RED}protoc-gen-grpc-swift is not installed.${NC}"
-    echo -e "${YELLOW}Please run: ./install-grpc-tools.sh${NC}"
-    exit 1
-fi
+# Count generated files
+GENERATED_COUNT=$(find "$OUTPUT_DIR" -name "*.swift" | wc -l | tr -d ' ')
 
-echo -e "${GREEN}Cleaning old generated files...${NC}"
-rm -f "$OUTPUT_DIR"/*.swift
-
-# Generate from local proto files
-echo -e "${GREEN}Generating Swift files from proto...${NC}"
-
-# Generate subscription.proto
-if [ -f "$PROTO_DIR/subscription.proto" ]; then
-    echo -e "${GREEN}Processing subscription.proto...${NC}"
+if [ "$GENERATED_COUNT" -eq "0" ]; then
+    echo -e "${RED}Error: No files were generated${NC}"
+    echo "Trying direct protoc generation as fallback..."
     
-    protoc \
-        --proto_path="$PROTO_DIR" \
-        --swift_out="$OUTPUT_DIR" \
-        --swift_opt=Visibility=Public \
-        --grpc-swift_out="$OUTPUT_DIR" \
-        --grpc-swift_opt=Visibility=Public \
-        --grpc-swift_opt=Client=true \
-        --grpc-swift_opt=Server=false \
-        "$PROTO_DIR/subscription.proto"
+    # Fallback to direct protoc generation
+    cd "$DEVOPS_DIR/proto-management"
+    
+    # Generate protobuf files
+    protoc --swift_out="$OUTPUT_DIR" \
+           --swift_opt=Visibility=Public \
+           --swift_opt=FileNaming=DropPath \
+           proto/classnotes/v1/classnotes_service.proto
+    
+    # Generate gRPC files
+    protoc --grpc-swift_out="$OUTPUT_DIR" \
+           --grpc-swift_opt=Visibility=Public \
+           --grpc-swift_opt=Client=true \
+           --grpc-swift_opt=Server=false \
+           proto/classnotes/v1/classnotes_service.proto
+    
+    GENERATED_COUNT=$(find "$OUTPUT_DIR" -name "*.swift" | wc -l | tr -d ' ')
 fi
 
-# Check if we have the classnotes service proto locally or need to get it
-CLASSNOTES_PROTO="/Users/jeremy/Code/class-notes-project/classnotes-devops/proto-management/proto/classnotes/v1/classnotes_service.proto"
-if [ -f "$CLASSNOTES_PROTO" ]; then
-    echo -e "${GREEN}Processing classnotes_service.proto...${NC}"
-    
-    # Copy it locally first
-    cp "$CLASSNOTES_PROTO" "$PROTO_DIR/classnotes_service.proto"
-    
-    protoc \
-        --proto_path="$PROTO_DIR" \
-        --swift_out="$OUTPUT_DIR" \
-        --swift_opt=Visibility=Public \
-        --grpc-swift_out="$OUTPUT_DIR" \
-        --grpc-swift_opt=Visibility=Public \
-        --grpc-swift_opt=Client=true \
-        --grpc-swift_opt=Server=false \
-        "$PROTO_DIR/classnotes_service.proto"
-fi
+echo -e "${GREEN}Successfully generated $GENERATED_COUNT Swift files${NC}"
+
+# Fix imports in generated files to ensure gRPC Swift v2 compatibility
+echo -e "${YELLOW}Fixing imports for gRPC Swift v2...${NC}"
+for file in "$OUTPUT_DIR"/*.swift; do
+    if [ -f "$file" ]; then
+        # The import GRPCProtobuf is actually correct for v2, so we don't need to change it
+        # Just ensure we're not using old v1 imports
+        sed -i '' 's/import GRPC$/import GRPCCore/g' "$file" 2>/dev/null || true
+        sed -i '' 's/import NIO$/import NIOCore/g' "$file" 2>/dev/null || true
+    fi
+done
 
 echo -e "${GREEN}Proto generation complete!${NC}"
-echo -e "${GREEN}Generated files are in: $OUTPUT_DIR${NC}"
-
-# List generated files
-echo -e "${YELLOW}Generated files:${NC}"
-ls -la "$OUTPUT_DIR"/*.swift 2>/dev/null || echo "No files generated"
-
-# Make the script executable
-chmod +x "$0" 
+echo ""
+echo "Generated files are in: $OUTPUT_DIR"
+echo ""
+echo -e "${YELLOW}Note: The 'import GRPCProtobuf' in generated files is correct for gRPC Swift v2${NC}"
+echo "GRPCProtobuf is the v2 module for protobuf serialization/deserialization." 

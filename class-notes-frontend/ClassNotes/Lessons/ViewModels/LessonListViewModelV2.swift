@@ -262,17 +262,37 @@ final class LessonListViewModelV2: ObservableObject {
 // MARK: - Lesson Extension
 
 extension Lesson {
-    /// Initialize from protobuf class note
-    init(from proto: Classnotes_V1_ClassNote) {
+    /// Initialize from protobuf class note summary
+    init(from proto: Classnotes_V1_ClassNoteSummary) {
         self.init(
-            id: proto.id,
             title: proto.title,
             date: proto.createdAt.date,
-            duration: TimeInterval(proto.duration),
-            transcript: proto.transcript,
-            summary: proto.summary.isEmpty ? nil : proto.summary,
-            pdfURL: proto.pdfURL.isEmpty ? nil : URL(string: proto.pdfURL)
+            duration: 0, // Duration not available in summary
+            transcript: proto.textPreview, // Use text preview as transcript
+            audioURL: nil, // Not available in summary
+            pdfURL: nil, // Not available in summary
+            tags: [], // Not available in summary
+            isFavorite: false,
+            lastModified: proto.hasModifiedAt ? proto.modifiedAt.date : proto.createdAt.date,
+            syncStatus: .synced
         )
+        // Override the generated UUID with the class note ID
+        self.id = UUID(uuidString: proto.classNoteID) ?? UUID()
+        self.summary = proto.textPreview
+        
+        // Map proto processing status to local status
+        switch proto.status {
+        case .pending:
+            self.processingStatus = .processing
+        case .processing:
+            self.processingStatus = .processing
+        case .completed:
+            self.processingStatus = .completed
+        case .failed:
+            self.processingStatus = .failed
+        default:
+            self.processingStatus = nil
+        }
     }
 }
 

@@ -14,7 +14,7 @@ NC='\033[0m' # No Color
 # Script directory
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 FRONTEND_DIR="$( cd "$SCRIPT_DIR/.." && pwd )"
-PROJECT_ROOT="$( cd "$FRONTEND_DIR/../../.." && pwd )"
+PROJECT_ROOT="/Users/jeremy/Code/class-notes-project"
 BACKEND_DIR="$PROJECT_ROOT/class-notes-backend"
 
 echo -e "${GREEN}gRPC-Swift v2 Proto Generation${NC}"

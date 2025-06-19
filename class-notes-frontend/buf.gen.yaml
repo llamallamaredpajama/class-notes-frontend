@@ -2,7 +2,7 @@ version: v1
 managed:
   enabled: false
 plugins:
-  # Swift protobuf generation
+  # Swift protobuf generation (local)
   - plugin: swift
     out: ClassNotes/Core/Networking/gRPC/Generated
     opt:
@@ -10,13 +10,11 @@ plugins:
       - FileNaming=DropPath
       - SwiftProtobufModuleName=SwiftProtobuf
   
-  # gRPC-Swift v2 client generation
+  # gRPC-Swift v2 client generation (local)
   - plugin: grpc-swift
     out: ClassNotes/Core/Networking/gRPC/Generated
     opt:
       - Visibility=Public
       - Client=true
       - Server=false
-      - FileNaming=DropPath
-      - UseProtobufModuleName=true
-      - SwiftProtobufModuleName=SwiftProtobuf 
+      - FileNaming=DropPath 

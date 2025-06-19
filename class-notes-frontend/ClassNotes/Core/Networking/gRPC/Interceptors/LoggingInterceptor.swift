@@ -98,7 +98,6 @@ struct LoggingInterceptor: ClientInterceptor, Sendable {
         case .detailed:
             var logMessage = "gRPC Request [\(requestID)]\n"
             logMessage += "  Method: \(context.descriptor.fullyQualifiedMethod)\n"
-            logMessage += "  Service: \(context.descriptor.fullyQualifiedService)\n"
             
             // Log metadata if present
             if !request.metadata.isEmpty {
@@ -107,9 +106,10 @@ struct LoggingInterceptor: ClientInterceptor, Sendable {
                 // In debug builds, show actual headers (excluding sensitive ones)
                 for (key, values) in request.metadata {
                     if !key.lowercased().contains("authorization") && !key.lowercased().contains("token") {
-                        // Join multiple values with comma
-                        let valueString = values.joined(separator: ", ")
-                        logMessage += "\n    \(key): \(valueString)"
+                        // Fix: values is already an array, iterate through them
+                        for value in values {
+                            logMessage += "\n    \(key): \(value)"
+                        }
                     }
                 }
                 #endif
@@ -178,16 +178,6 @@ struct LoggingInterceptor: ClientInterceptor, Sendable {
             return String(format: "%.2fs", duration)
         }
     }
-}
-
-// MARK: - OSLog Extension
-
-extension OSLog {
-    /// Dedicated logger for gRPC operations
-    static let grpc = OSLog(
-        subsystem: "com.classnotes",
-        category: "gRPC"
-    )
 }
 
 // MARK: - Request/Response Logging Extensions

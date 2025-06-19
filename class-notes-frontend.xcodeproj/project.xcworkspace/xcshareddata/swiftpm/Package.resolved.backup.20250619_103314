@@ -1,5 +1,5 @@
 {
-  "originHash" : "907075b1362be17604a1c2793822534de11b8bf787e79354dab6111e80444ed3",
+  "originHash" : "5cf3f64076b86a2b683f40ae436cf1eb56538577f458cc039e454fc77ef46212",
   "pins" : [
     {
       "identity" : "abseil-cpp-binary",
@@ -106,6 +106,15 @@
       "location" : "https://github.com/grpc/grpc-swift-nio-transport",
       "state" : {
         "revision" : "e3069431c4e640c39e16342b318b39d2ac458c67",
+        "version" : "2.0.0"
+      }
+    },
+    {
+      "identity" : "grpc-swift-protobuf",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/grpc/grpc-swift-protobuf",
+      "state" : {
+        "revision" : "df605cde2957657a078eb754ed24f3a0e05d3f54",
         "version" : "2.0.0"
       }
     },

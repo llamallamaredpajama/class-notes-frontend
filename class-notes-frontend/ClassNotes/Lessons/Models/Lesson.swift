@@ -17,7 +17,7 @@ enum SyncStatus: String, Codable {
 }
 
 // MARK: - Processing Status
-enum ProcessingStatus: String, Codable {
+enum LessonProcessingStatus: String, Codable {
     case processing
     case completed
     case failed
@@ -81,7 +81,7 @@ final class Lesson {
     var hasPDF: Bool
     
     /// Processing status for AI analysis
-    var processingStatus: ProcessingStatus?
+    var processingStatus: LessonProcessingStatus?
     
     // MARK: - Relationships
     
