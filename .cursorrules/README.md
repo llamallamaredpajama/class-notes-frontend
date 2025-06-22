@@ -20,6 +20,7 @@
 - ⚡ [Quick Reference](./references/quick-ref.md)
 - 📝 [Commands](./references/commands.md)
 - 🔧 [Troubleshooting](./references/troubleshooting.md)
+- ⚠️ [gRPC-Swift v2 Migration](./migrations/grpc-swift-v2.md)
 
 ---
 
@@ -452,4 +453,50 @@ Before submitting to App Store:
 - [ ] Write release notes
 - [ ] Test in-app purchases (if any)
 - [ ] Archive and validate build
-- [ ] Submit for review with metadata 
+- [ ] Submit for review with metadata
+
+## Documentation Practices
+
+### MANDATORY Documentation Guidelines
+
+**1. Use Consolidated Documents**
+- ✅ Add new information to existing consolidated documents
+- ❌ DO NOT create new summary/status files for temporary updates
+- ✅ Update `GRPC_SWIFT_V2_CONSOLIDATED.md` for all gRPC-related information
+- ✅ Keep technical guides (setup, configuration) separate from status documents
+
+**2. Version Control**
+- ✅ Use git history for tracking changes
+- ❌ DO NOT create multiple versions of the same document (e.g., v1, v2, FINAL, UPDATED)
+- ✅ Use meaningful commit messages when updating documentation
+
+**3. Documentation Structure**
+```
+Frontend/
+├── README.md                              # Project overview & quick start
+├── GRPC_SWIFT_V2_CONSOLIDATED.md         # All gRPC v2 information
+├── SUBSCRIPTION_IMPLEMENTATION.md         # iOS subscription details
+├── ClassNotes/
+│   └── [Component]/README.md             # Component-specific docs
+└── .cursorrules/                         # Development guidelines
+```
+
+**4. When to Create New Documents**
+Only create new documentation files when:
+- Introducing a completely new feature or system
+- Creating a technical guide (setup, configuration, how-to)
+- Documenting a new API or integration
+- Writing component-specific documentation
+
+**5. Quarterly Documentation Review**
+- Review all documentation for redundancy
+- Consolidate related documents
+- Archive outdated information
+- Update consolidated documents with recent changes
+
+**6. Documentation Standards**
+- Use clear, descriptive titles
+- Include table of contents for long documents
+- Add creation/update dates
+- Cross-reference related documents
+- Keep code examples up-to-date 

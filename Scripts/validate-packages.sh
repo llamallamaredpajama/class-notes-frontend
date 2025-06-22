@@ -27,12 +27,8 @@ validate_pbxproj() {
         return 1
     fi
 
-    if grep -v "^[[:space:]]*#\|^[[:space:]]*//\|^[[:space:]]*\*" "$PBXPROJ_FILE" | grep -q "grpc-swift-protobuf"; then
-        echo -e "${RED}❌ ERROR: Found reference to old grpc-swift-protobuf package!${NC}"
-        echo "   This is a gRPC v1 package that should not be used."
-        echo "   Use GRPCCore from grpc-swift-2 instead."
-        return 1
-    fi
+    # Note: grpc-swift-protobuf v2.x is REQUIRED for protobuf support in gRPC Swift v2
+    # We don't check for it here since it's a valid v2 package
 
     # Check for the old main grpc-swift repo (not grpc-swift-2)
     if grep -v "^[[:space:]]*#\|^[[:space:]]*//\|^[[:space:]]*\*" "$PBXPROJ_FILE" | grep "grpc-swift" | grep -v "grpc-swift-2\|grpc-swift-nio-transport"; then
@@ -71,10 +67,17 @@ validate_package_resolved() {
         fi
     fi
 
+    # Check for grpc-swift-protobuf - v2.x is REQUIRED for protobuf support
     if grep -q '"grpc-swift-protobuf"' "$PACKAGE_RESOLVED"; then
-        echo -e "${RED}❌ ERROR: Package.resolved contains old grpc-swift-protobuf package!${NC}"
-        echo "   This package should not be used with gRPC Swift v2."
-        return 1
+        VERSION=$(grep -A 10 '"grpc-swift-protobuf"' "$PACKAGE_RESOLVED" | grep '"version"' | head -1 | sed 's/.*"version" : "\([^"]*\)".*/\1/')
+        if [[ "$VERSION" =~ ^1\. ]]; then
+            echo -e "${RED}❌ ERROR: Package.resolved contains grpc-swift-protobuf v1.x!${NC}"
+            echo "   Found version: $VERSION"
+            echo "   This should be v2.x for gRPC Swift v2."
+            return 1
+        else
+            echo -e "${GREEN}✅ Found grpc-swift-protobuf v$VERSION (required for protobuf support)${NC}"
+        fi
     fi
 
     if grep -q '"grpc-swift"' "$PACKAGE_RESOLVED" && ! grep -q '"grpc-swift-2"' "$PACKAGE_RESOLVED"; then

@@ -1,6 +1,9 @@
 import Foundation
 import SwiftData
 
+// MARK: - Type Aliases to resolve ambiguity
+typealias AppUser = User
+
 /// Main authentication service implementation
 @MainActor
 final class AuthenticationService: AuthenticationServiceProtocol {
@@ -9,7 +12,7 @@ final class AuthenticationService: AuthenticationServiceProtocol {
         googleService: GoogleSignInService(),
         appleService: AppleSignInService()
     )
-    
+
     private let googleService: GoogleSignInServiceProtocol
     private let appleService: AppleSignInServiceProtocol
     private let keychainService: KeychainServiceProtocol
@@ -28,7 +31,7 @@ final class AuthenticationService: AuthenticationServiceProtocol {
         self.appleService = appleService
         self.keychainService = keychainService
         self.modelContext = modelContext
-        
+
         // Initialize authentication status
         Task {
             _isAuthenticated = await checkAuthenticationStatus()
@@ -46,6 +49,11 @@ final class AuthenticationService: AuthenticationServiceProtocol {
 
     var currentUser: AppUser? {
         return _currentUser
+    }
+
+    /// Current authentication token for gRPC interceptors
+    var currentToken: String? {
+        return keychainService.loadString(key: KeychainService.Key.authToken)
     }
 
     func signIn() async throws {

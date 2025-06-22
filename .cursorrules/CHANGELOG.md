@@ -1,5 +1,12 @@
 # Frontend Cursor Rules Changelog
 
+## [2025-01-29] - Documentation Practices Added
+- Added mandatory documentation guidelines to prevent redundancy
+- Established consolidated document approach (GRPC_SWIFT_V2_CONSOLIDATED.md)
+- Defined when to create new documents vs updating existing ones
+- Added quarterly documentation review process
+- Set standards for documentation structure and version control
+
 ## [1.0.0] - 2025-01-28
 
 ### Added

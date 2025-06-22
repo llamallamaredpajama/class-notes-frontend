@@ -1,187 +1,162 @@
 # Networking & gRPC Integration
 
-## Overview
+## ⚠️ CRITICAL: gRPC-Swift v2 Requirements
 
-This document covers networking patterns for the Class Notes iOS application, focusing on gRPC-Swift integration, offline support, and seamless backend communication.
+**ALWAYS USE gRPC-Swift v2 (NOT v1)**
+- **Repository**: `https://github.com/grpc/grpc-swift-2` (NOT grpc-swift)
+- **Version**: 2.0.0 or later
+- **Required Packages**:
+  - `grpc-swift-2` → Provides GRPCCore module
+  - `grpc-swift-nio-transport` → Provides GRPCNIOTransportHTTP2 module
+  - `grpc-swift-protobuf` → Provides GRPCProtobuf module (v2.x from https://github.com/grpc/grpc-swift-protobuf)
 
-## gRPC Client Architecture
+**⚠️ COMMON MISTAKES TO AVOID**:
+- DO NOT use `https://github.com/grpc/grpc-swift` (this is v1 in maintenance mode)
+- DO NOT trust version numbers alone - grpc-swift v1 shows 2.x.x versions but is still v1 API
+- DO NOT regenerate protos inside Xcode - use GeneratedProtos package approach
+- DO NOT put buf.gen.yaml files in Frontend directories
 
-### Client Manager
+## Proto Generation Strategy
+
+### MANDATORY: Use External Proto Generation
+To prevent Xcode compilation errors, protos MUST be generated outside of Xcode:
+
+```bash
+# Use Scripts/generate-protos-direct.sh
+# This creates a GeneratedProtos package that's added as a local dependency
+# NEVER generate protos directly in the main project
+```
+
+### GeneratedProtos Package Structure
+```
+GeneratedProtos/
+├── Package.swift          # At root, NOT in Sources/
+├── Sources/
+│   └── GeneratedProtos/
+│       ├── classnotes_service.pb.swift
+│       └── classnotes_service.grpc.swift
+```
+
+## gRPC Client Architecture (v2)
+
+### Client Manager (gRPC-Swift v2)
 ```swift
-import GRPC
-import NIO
+import GRPCCore
+import GRPCNIOTransportHTTP2
 
-final class GRPCClientManager {
-    static let shared = GRPCClientManager()
+@GRPCClientActor
+final class GRPCClientProvider {
+    static let shared = GRPCClientProvider()
     
-    private let eventLoopGroup: EventLoopGroup
-    private var channel: GRPCChannel?
-    private let configuration: ClientConfiguration
+    private let transport: HTTP2ClientTransport.Posix
+    private let client: GRPCClient<HTTP2ClientTransport.Posix>
     
-    init(configuration: ClientConfiguration = .default) {
-        self.configuration = configuration
-        self.eventLoopGroup = PlatformSupport.makeEventLoopGroup(loopCount: 1)
-    }
-    
-    private func createChannel() throws -> GRPCChannel {
-        let keepalive = ClientConnectionKeepalive(
-            interval: .seconds(30),
-            timeout: .seconds(10)
+    init() {
+        self.transport = HTTP2ClientTransport.Posix(
+            target: .dns(host: Config.apiHost, port: Config.apiPort),
+            config: .defaults(transportSecurity: .tls)
         )
         
-        return try GRPCChannelPool.with(
-            target: .host(configuration.host, port: configuration.port),
-            transportSecurity: configuration.useTLS ? .tls(
-                GRPCTLSConfiguration.makeClientDefault(
-                    certificateVerification: .fullVerification
-                )
-            ) : .plaintext,
-            eventLoopGroup: eventLoopGroup
-        ) {
-            $0.keepalive = keepalive
-            $0.connectionBackoff = ConnectionBackoff(
-                initialBackoff: 1.0,
-                maximumBackoff: 60.0,
-                multiplier: 1.6
-            )
-        }
-    }
-    
-    func makeClient() throws -> ClassNotesServiceAsyncClient {
-        if channel == nil {
-            channel = try createChannel()
-        }
-        
-        return ClassNotesServiceAsyncClient(
-            channel: channel!,
-            defaultCallOptions: CallOptions(
-                customMetadata: HPACKHeaders(),
-                timeLimit: .timeout(.seconds(30))
-            ),
-            interceptors: ClientInterceptorFactory()
+        // Use concrete type, NOT protocol
+        self.client = GRPCClient(
+            transport: transport,
+            interceptors: [
+                AuthInterceptor(),
+                AppCheckInterceptor(),
+                LoggingInterceptor(),
+                RetryInterceptor()
+            ]
         )
     }
     
-    func shutdown() async throws {
-        try await channel?.close()
-        try await eventLoopGroup.shutdownGracefully()
+    func getServiceClient() -> Classnotes_V1_ClassNotesAPI.Client {
+        return Classnotes_V1_ClassNotesAPI.Client(wrapping: client)
     }
 }
 ```
 
-### Configuration
-```swift
-struct ClientConfiguration {
-    let host: String
-    let port: Int
-    let useTLS: Bool
-    
-    static let `default` = ClientConfiguration(
-        host: "api.classnotes.app",
-        port: 443,
-        useTLS: true
-    )
-    
-    static let local = ClientConfiguration(
-        host: "localhost",
-        port: 8080,
-        useTLS: false
-    )
-    
-    #if DEBUG
-    static var current: ClientConfiguration {
-        ProcessInfo.processInfo.environment["USE_LOCAL_BACKEND"] != nil ? .local : .default
-    }
-    #else
-    static let current = ClientConfiguration.default
-    #endif
-}
-```
+## Interceptors (gRPC-Swift v2)
 
-## Interceptors
-
-### Authentication Interceptor
+### CRITICAL: Correct v2 Interceptor Pattern
 ```swift
-final class AuthInterceptor: ClientInterceptor<ClassNotesRequest, ClassNotesResponse> {
-    private let authService: AuthenticationService
-    
-    init(authService: AuthenticationService = .shared) {
-        self.authService = authService
-    }
-    
-    override func send(
-        _ part: GRPCClientRequestPart<ClassNotesRequest>,
-        promise: EventLoopPromise<Void>?,
-        context: ClientInterceptorContext<ClassNotesRequest, ClassNotesResponse>
-    ) {
-        switch part {
-        case .metadata(var headers):
-            // Add Firebase auth token
-            if let token = authService.currentToken {
-                headers.add(name: "authorization", value: "Bearer \(token)")
-            }
-            
-            // Add app check token
-            if let appCheckToken = authService.appCheckToken {
-                headers.add(name: "x-firebase-appcheck", value: appCheckToken)
-            }
-            
-            // Add client metadata
-            headers.add(name: "x-client-version", value: Bundle.main.appVersion)
-            headers.add(name: "x-client-platform", value: "iOS")
-            
-            context.send(.metadata(headers), promise: promise)
-            
-        default:
-            context.send(part, promise: promise)
-        }
-    }
-}
-```
+import GRPCCore
 
-### Logging Interceptor
-```swift
-final class LoggingInterceptor: ClientInterceptor<ClassNotesRequest, ClassNotesResponse> {
-    private let logger = Logger(subsystem: "com.classnotes.grpc", category: "requests")
+// CORRECT v2.0.0 signature - Output is the second generic parameter
+struct AuthInterceptor: ClientInterceptor {
+    typealias Output = ClientResponse
     
-    override func send(
-        _ part: GRPCClientRequestPart<ClassNotesRequest>,
-        promise: EventLoopPromise<Void>?,
-        context: ClientInterceptorContext<ClassNotesRequest, ClassNotesResponse>
-    ) {
-        switch part {
-        case .metadata(let headers):
-            logger.debug("Sending request to \(context.path)")
-            #if DEBUG
-            logger.debug("Headers: \(headers)")
-            #endif
-        case .message(let request, _):
-            logger.debug("Request payload: \(type(of: request))")
-        default:
-            break
+    func intercept<Input: Sendable, Interceptor>(
+        request: ClientRequest<Input>,
+        context: ClientInterceptorContext<Input, ClientResponse>,
+        next: @Sendable (
+            ClientRequest<Input>,
+            ClientInterceptorContext<Input, ClientResponse>
+        ) async throws -> ClientResponse
+    ) async throws -> ClientResponse {
+        var modifiedRequest = request
+        
+        // v2 Metadata is immutable - create new instance
+        if let token = await AuthenticationService.shared.currentToken {
+            var newMetadata = request.metadata
+            newMetadata.addString("Bearer \(token)", forKey: "authorization")
+            modifiedRequest.metadata = newMetadata
         }
         
-        context.send(part, promise: promise)
+        return try await next(modifiedRequest, context)
     }
+}
+```
+
+### Metadata Handling in v2
+```swift
+// WRONG - v1 pattern
+metadata["key"] = "value"
+metadata.add(name: "key", value: "value")
+
+// CORRECT - v2 pattern
+var newMetadata = metadata
+newMetadata.addString("value", forKey: "key")
+
+// Reading metadata in v2
+if let values = metadata.strings(forKey: "key") {
+    let value = values.first ?? ""
+}
+
+// Iterating metadata in v2
+for (key, value) in metadata {
+    // Note: NOT (key, values) - singular value
+    print("\(key): \(String(value))")
+}
+```
+
+### Logging Interceptor (v2)
+```swift
+import GRPCCore
+import OSLog
+
+struct LoggingInterceptor: ClientInterceptor {
+    typealias Output = ClientResponse
     
-    override func receive(
-        _ part: GRPCClientResponsePart<ClassNotesResponse>,
-        context: ClientInterceptorContext<ClassNotesRequest, ClassNotesResponse>
-    ) {
-        switch part {
-        case .metadata(let headers):
-            logger.debug("Received response headers")
-        case .message(let response):
-            logger.debug("Response received: \(type(of: response))")
-        case .end(let status, _):
-            if status.isOk {
-                logger.debug("Request completed successfully")
-            } else {
-                logger.error("Request failed: \(status)")
-            }
-        }
+    private let logger = Logger(subsystem: "com.classnotes", category: "grpc")
+    
+    func intercept<Input: Sendable, Interceptor>(
+        request: ClientRequest<Input>,
+        context: ClientInterceptorContext<Input, ClientResponse>,
+        next: @Sendable (
+            ClientRequest<Input>,
+            ClientInterceptorContext<Input, ClientResponse>
+        ) async throws -> ClientResponse
+    ) async throws -> ClientResponse {
+        logger.debug("Request to \(context.method)")
         
-        context.receive(part)
+        do {
+            let response = try await next(request, context)
+            logger.debug("Response received")
+            return response
+        } catch {
+            logger.error("Request failed: \(error)")
+            throw error
+        }
     }
 }
 ```
@@ -222,16 +197,16 @@ protocol LessonServiceProtocol {
 final class LessonService: LessonServiceProtocol {
     static let shared = LessonService()
     
-    private let grpcClient: ClassNotesServiceAsyncClient
+    private let grpcClient: Classnotes_V1_ClassNotesAPI.Client
     private let cacheManager: CacheManager
     private let offlineQueue: OfflineOperationQueue
     
     init(
-        grpcClient: ClassNotesServiceAsyncClient? = nil,
+        grpcClient: Classnotes_V1_ClassNotesAPI.Client? = nil,
         cacheManager: CacheManager = .shared,
         offlineQueue: OfflineOperationQueue = .shared
     ) {
-        self.grpcClient = grpcClient ?? (try? GRPCClientManager.shared.makeClient()) ?? ClassNotesServiceAsyncClient.mock
+        self.grpcClient = grpcClient ?? GRPCClientProvider.shared.getServiceClient()
         self.cacheManager = cacheManager
         self.offlineQueue = offlineQueue
     }
@@ -246,10 +221,10 @@ final class LessonService: LessonServiceProtocol {
         }
         
         // Create request
-        let request = CreateLessonRequest.with {
+        let request = Classnotes_V1_CreateLessonRequest.with {
             $0.title = lesson.title
             $0.subject = lesson.subject
-            $0.date = lesson.date.toTimestamp()
+            $0.classroomID = lesson.classroomId
         }
         
         // Make gRPC call

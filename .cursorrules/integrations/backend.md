@@ -1,8 +1,87 @@
 # Backend Integration Guide
 
-## Overview
+## ⚠️ CRITICAL: gRPC-Swift v2 Package Requirements
 
-This document provides comprehensive guidance on integrating the Class Notes iOS/iPadOS frontend with the Go microservices backend via gRPC and Protocol Buffers.
+**NEVER use gRPC-Swift v1 packages or patterns**. This project uses gRPC-Swift v2 exclusively.
+
+### Correct Package Configuration
+```swift
+// Package.swift
+import PackageDescription
+
+let package = Package(
+    name: "ClassNotes",
+    platforms: [
+        .iOS(.v17),
+        .macOS(.v14)
+    ],
+    dependencies: [
+        // ✅ CORRECT - gRPC-Swift v2 packages
+        .package(url: "https://github.com/grpc/grpc-swift-2.git", from: "2.0.0"),
+        .package(url: "https://github.com/grpc/grpc-swift-nio-transport.git", from: "2.0.0"),
+        .package(url: "https://github.com/grpc/grpc-swift-protobuf.git", from: "2.0.0"),
+        .package(url: "https://github.com/apple/swift-protobuf.git", from: "1.25.0"),
+        
+        // ❌ WRONG - DO NOT USE THESE
+        // .package(url: "https://github.com/grpc/grpc-swift.git", ...) // This is v1!
+    ],
+    targets: [
+        .target(
+            name: "ClassNotesGRPC",
+            dependencies: [
+                .product(name: "GRPCCore", package: "grpc-swift-2"),
+                .product(name: "GRPCNIOTransportHTTP2", package: "grpc-swift-nio-transport"),
+                .product(name: "GRPCProtobuf", package: "grpc-swift-protobuf"),
+                .product(name: "SwiftProtobuf", package: "swift-protobuf"),
+            ]
+        ),
+    ]
+)
+```
+
+### Proto Generation Best Practice
+**MANDATORY**: Generate protos in a separate package to avoid Xcode compilation issues:
+
+```bash
+#!/bin/bash
+# Scripts/generate-protos-direct.sh
+
+# Generate in external directory
+OUTPUT_DIR="../GeneratedProtos"
+mkdir -p $OUTPUT_DIR/Sources/GeneratedProtos
+
+# Use buf with v2 plugin
+buf generate --template buf.gen.yaml
+
+# Create Package.swift at root (NOT in Sources/)
+cat > $OUTPUT_DIR/Package.swift << EOF
+// swift-tools-version: 5.9
+import PackageDescription
+
+let package = Package(
+    name: "GeneratedProtos",
+    platforms: [.iOS(.v17)],
+    products: [
+        .library(name: "GeneratedProtos", targets: ["GeneratedProtos"])
+    ],
+    dependencies: [
+        .package(url: "https://github.com/grpc/grpc-swift-2.git", from: "2.0.0"),
+        .package(url: "https://github.com/grpc/grpc-swift-protobuf.git", from: "2.0.0"),
+        .package(url: "https://github.com/apple/swift-protobuf.git", from: "1.25.0")
+    ],
+    targets: [
+        .target(
+            name: "GeneratedProtos",
+            dependencies: [
+                .product(name: "GRPCCore", package: "grpc-swift-2"),
+                .product(name: "GRPCProtobuf", package: "grpc-swift-protobuf"),
+                .product(name: "SwiftProtobuf", package: "swift-protobuf")
+            ]
+        )
+    ]
+)
+EOF
+```
 
 ## Architecture Overview
 
@@ -40,14 +119,18 @@ let package = Package(
         .macOS(.v14)
     ],
     dependencies: [
-        .package(url: "https://github.com/grpc/grpc-swift.git", from: "1.19.0"),
+        .package(url: "https://github.com/grpc/grpc-swift-2.git", from: "2.0.0"),
+        .package(url: "https://github.com/grpc/grpc-swift-nio-transport.git", from: "2.0.0"),
+        .package(url: "https://github.com/grpc/grpc-swift-protobuf.git", from: "2.0.0"),
         .package(url: "https://github.com/apple/swift-protobuf.git", from: "1.25.0"),
     ],
     targets: [
         .target(
             name: "ClassNotesGRPC",
             dependencies: [
-                .product(name: "GRPC", package: "grpc-swift"),
+                .product(name: "GRPCCore", package: "grpc-swift-2"),
+                .product(name: "GRPCNIOTransportHTTP2", package: "grpc-swift-nio-transport"),
+                .product(name: "GRPCProtobuf", package: "grpc-swift-protobuf"),
                 .product(name: "SwiftProtobuf", package: "swift-protobuf"),
             ],
             path: "Sources/ClassNotesGRPC",
@@ -64,18 +147,21 @@ let package = Package(
 #!/bin/bash
 # Scripts/sync-protos.sh
 
+# ⚠️ IMPORTANT: Always regenerate using GeneratedProtos approach
+# NEVER put generated files directly in the main project
+
 BACKEND_PROTO_DIR="../class-notes-backend/proto"
-FRONTEND_PROTO_DIR="Sources/ClassNotesGRPC/Protos"
+GENERATED_DIR="../GeneratedProtos/Sources/GeneratedProtos"
 
 # Copy proto files
-cp -r $BACKEND_PROTO_DIR/* $FRONTEND_PROTO_DIR/
+cp -r $BACKEND_PROTO_DIR/* ../proto-temp/
 
-# Generate Swift code
-protoc \
-    --swift_out=$FRONTEND_PROTO_DIR \
-    --grpc-swift_out=$FRONTEND_PROTO_DIR \
-    --proto_path=$FRONTEND_PROTO_DIR \
-    $FRONTEND_PROTO_DIR/classnotes/v1/*.proto
+# Generate using buf with v2 configuration
+cd ../GeneratedProtos
+buf generate --template ../class-notes-frontend/buf.gen.yaml
+
+# Ensure no buf.gen.yaml files in Frontend
+find ../class-notes-frontend -name "buf.gen.yaml" -delete
 ```
 
 ## Service Integration Patterns

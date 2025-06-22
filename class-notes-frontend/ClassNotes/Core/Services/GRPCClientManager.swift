@@ -1,8 +1,7 @@
 // 1. Standard library
 import Foundation
 // 3. Third-party dependencies
-import GRPCCore
-import GRPCNIOTransportHTTP2
+import GeneratedProtos
 
 /// Manager for gRPC client connections using grpc-swift-2
 @MainActor
@@ -12,7 +11,7 @@ final class GRPCClientManager {
 
     // MARK: - Properties
     private var client: GRPCClient<HTTP2ClientTransport.Posix>?
-    
+
     // MARK: - Configuration
     private enum Config {
         static let apiHost = ProcessInfo.processInfo.environment["API_HOST"] ?? "api.classnotes.app"
@@ -27,7 +26,9 @@ final class GRPCClientManager {
 
     // MARK: - Client Access
     /// Get or create the ClassNotes service client
-    func getClassNotesClient() async throws -> Classnotes_V1_ClassNotesAPI.Client<HTTP2ClientTransport.Posix> {
+    func getClassNotesClient() async throws
+        -> Classnotes_V1_ClassNotesAPI.Client<HTTP2ClientTransport.Posix>
+    {
         if client == nil {
             client = try await createClient()
         }
@@ -38,9 +39,11 @@ final class GRPCClientManager {
 
         return Classnotes_V1_ClassNotesAPI.Client(wrapping: client)
     }
-    
+
     /// Get or create the Subscription service client
-    func getSubscriptionClient() async throws -> ClassNotes_V1_SubscriptionService.Client<HTTP2ClientTransport.Posix> {
+    func getSubscriptionClient() async throws
+        -> ClassNotes_V1_SubscriptionService.Client<HTTP2ClientTransport.Posix>
+    {
         if client == nil {
             client = try await createClient()
         }
@@ -59,7 +62,7 @@ final class GRPCClientManager {
             target: .ipv4(host: Config.apiHost, port: Config.apiPort),
             transportSecurity: Config.useSSL ? .tls : .plaintext
         )
-        
+
         // Create client with interceptors
         let client = GRPCClient(
             transport: transport,
@@ -67,10 +70,10 @@ final class GRPCClientManager {
                 AuthInterceptor(),
                 AppCheckInterceptor(),
                 LoggingInterceptor(logLevel: .basic),
-                RetryInterceptor()
+                RetryInterceptor(),
             ]
         )
-        
+
         // Note: grpc-swift-2 clients don't need explicit run() call
         return client
     }

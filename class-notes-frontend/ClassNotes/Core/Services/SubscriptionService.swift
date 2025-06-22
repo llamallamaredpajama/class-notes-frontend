@@ -1,8 +1,7 @@
 // 1. Standard library
 import Foundation
 // 3. Third-party imports
-import GRPCCore
-import GRPCNIOTransportHTTP2
+import GeneratedProtos
 import OSLog
 // 2. Apple frameworks
 import StoreKit
@@ -123,7 +122,7 @@ final class SubscriptionService: NSObject, ObservableObject {
                 wrapping: grpcClient
             )
         }
-        
+
         // Initialize with temporary client until async init completes
         self.grpcClient = GRPCClient(
             transport: EmptyTransport(),
@@ -271,12 +270,13 @@ final class SubscriptionService: NSObject, ObservableObject {
         // For iOS 18.0+, use StoreKit 2 transaction data
         // The transaction itself contains all verification data needed
         var receiptString = ""
-        
+
         if #available(iOS 15.0, *) {
             // Use StoreKit 2 approach - transaction already contains verification data
             // Convert transaction data to a format compatible with backend
             if let jsonData = try? JSONEncoder().encode(transaction),
-               let jsonString = String(data: jsonData, encoding: .utf8) {
+                let jsonString = String(data: jsonData, encoding: .utf8)
+            {
                 receiptString = Data(jsonString.utf8).base64EncodedString()
             } else {
                 // Fallback to transaction ID if encoding fails
@@ -289,7 +289,7 @@ final class SubscriptionService: NSObject, ObservableObject {
             else {
                 throw SubscriptionError.receiptNotFound
             }
-            
+
             let receiptData = try Data(contentsOf: appStoreReceiptURL)
             receiptString = receiptData.base64EncodedString()
         }
@@ -301,7 +301,8 @@ final class SubscriptionService: NSObject, ObservableObject {
             $0.productID = transaction.productID
             $0.originalTransactionID = String(transaction.originalID)
             $0.purchaseDate = Google_Protobuf_Timestamp(date: transaction.purchaseDate)
-            $0.originalPurchaseDate = Google_Protobuf_Timestamp(date: transaction.originalPurchaseDate)
+            $0.originalPurchaseDate = Google_Protobuf_Timestamp(
+                date: transaction.originalPurchaseDate)
 
             if let expirationDate = transaction.expirationDate {
                 $0.expirationDate = Google_Protobuf_Timestamp(date: expirationDate)
@@ -364,11 +365,13 @@ final class SubscriptionService: NSObject, ObservableObject {
 
     /// Perform gRPC call with authentication and retry logic
     private func performGRPCCall<T>(
-        _ operation: @escaping (ClassNotes_V1_SubscriptionService.Client<HTTP2ClientTransport.Posix>) async throws -> T
+        _ operation: @escaping (
+            ClassNotes_V1_SubscriptionService.Client<HTTP2ClientTransport.Posix>
+        ) async throws -> T
     ) async throws -> T {
         // Get subscription client from the manager
         let client = try await GRPCClientManager.shared.getSubscriptionClient()
-        
+
         // Perform the operation - retry is handled by the RetryInterceptor
         return try await operation(client)
     }
@@ -543,7 +546,7 @@ extension SwiftProtobuf.Google_Protobuf_Timestamp {
         let nanos = Int32((date.timeIntervalSince1970 - Double(seconds)) * 1_000_000_000)
         self.init(seconds: seconds, nanos: nanos)
     }
-    
+
     var date: Date {
         return Date(timeIntervalSince1970: Double(seconds) + Double(nanos) / 1_000_000_000)
     }
@@ -556,10 +559,8 @@ private struct EmptyTransport: ClientTransport {
     func connect(lazily: Bool) async throws -> any Streaming {
         throw GRPCError.transportNotInitialized
     }
-    
+
     func close() async {
         // No-op
     }
 }
-
-

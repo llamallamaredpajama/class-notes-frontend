@@ -1,91 +1,96 @@
 import Foundation
-import GRPCCore
-import GRPCNIOTransportHTTP2
+import GeneratedProtos
+import OSLog
 import SwiftProtobuf
 
-/// Main service for Class Notes operations using gRPC-Swift v2
+/// Main service for Class Notes operations following cursor rules patterns
 @MainActor
 final class ClassNotesService: ObservableObject {
     static let shared = ClassNotesService()
-    
-    private let grpcClient: GRPCClient
-    private let classNotesClient: Classnotes_V1_ClassNotesService.Client
-    
-    private init() {
-        Task {
-            self.grpcClient = await GRPCClientProvider.shared.makeGRPCClient()
-            self.classNotesClient = Classnotes_V1_ClassNotesService.Client(
-                wrapping: grpcClient
-            )
+
+    private let provider = GRPCClientProvider.shared
+    private let cacheManager = CacheManager.shared
+    private let offlineQueue = OfflineOperationQueue.shared
+    private let logger = Logger(subsystem: "com.classnotes", category: "service")
+
+    private init() {}
+
+    // MARK: - Lesson Operations
+
+    /// Create a new lesson with offline support
+    func createLesson(_ lesson: Lesson) async throws -> Lesson {
+        // Check network availability
+        guard NetworkMonitor.shared.isConnected else {
+            // Queue for later
+            try await offlineQueue.enqueue(.createLesson(lesson))
+            // Return with temporary ID
+            return lesson.withTemporaryID()
         }
-        
-        // Initialize with temporary client until async init completes
-        self.grpcClient = GRPCClient(
-            transport: EmptyTransport(),
-            interceptors: []
-        )
-        self.classNotesClient = Classnotes_V1_ClassNotesService.Client(
-            wrapping: self.grpcClient
-        )
-    }
-    
-    // MARK: - Transcript Operations
-    
-    /// Upload a transcript for a class note
-    func uploadTranscript(
-        classNoteId: String,
-        transcript: String,
-        metadata: TranscriptMetadata
-    ) async throws -> Classnotes_V1_UploadTranscriptResponse {
-        let request = Classnotes_V1_UploadTranscriptRequest.with {
-            $0.classNoteID = classNoteId
-            $0.transcript = transcript
-            $0.metadata = metadata.toProto()
+
+        // Create request
+        let request = Classnotes_V1_CreateLessonRequest.with {
+            $0.title = lesson.title
+            $0.subject = lesson.subject
+            $0.classroomID = lesson.classroomId
         }
-        
-        return try await classNotesClient.uploadTranscript(request)
+
+        // Make gRPC call
+        do {
+            let client = provider.getServiceClient()
+            let response = try await client.createLesson(request)
+            let createdLesson = Lesson(from: response.lesson)
+
+            // Update cache
+            try await cacheManager.cache(createdLesson)
+
+            return createdLesson
+        } catch {
+            throw mapGRPCError(error)
+        }
     }
-    
-    // MARK: - Document Operations (Client Streaming)
-    
-    /// Upload multiple documents for a class note
-    func uploadDocuments(
-        classNoteId: String,
-        documents: [DocumentData]
-    ) async throws -> Classnotes_V1_UploadDocumentsResponse {
-        // Create stream of document requests
-        let requests = documents.map { doc in
-            Classnotes_V1_UploadDocumentRequest.with {
-                $0.classNoteID = classNoteId
-                $0.document = doc.toProto()
+
+    /// Fetch lessons with cache-first approach
+    func fetchLessons() async throws -> [Lesson] {
+        // Always return cached data first
+        let cachedLessons = try await cacheManager.fetchLessons()
+
+        // Fetch fresh data in background
+        Task.detached { [weak self] in
+            guard let self else { return }
+
+            do {
+                let request = Classnotes_V1_ListClassNotesRequest()
+                let client = await self.provider.getServiceClient()
+                let response = try await client.listClassNotes(request)
+                let lessons = response.classNotes.map { Lesson(from: $0) }
+
+                // Update cache
+                try await self.cacheManager.syncLessons(lessons)
+            } catch {
+                // Log but don't throw - we have cached data
+                self.logger.error("Failed to sync lessons: \(error)")
             }
         }
-        
-        // Use client streaming
-        return try await classNotesClient.uploadDocuments(
-            .init(elements: requests)
-        )
+
+        return cachedLessons
     }
-    
-    // MARK: - Processing Status (Server Streaming)
-    
-    /// Observe processing status updates for a class note
-    func observeProcessingStatus(
-        classNoteId: String
-    ) -> AsyncThrowingStream<ProcessingStatus, Error> {
-        AsyncThrowingStream { continuation in
+
+    /// Stream processing status for a lesson
+    func streamProcessingStatus(for lessonID: String) -> AsyncStream<ProcessingStatus> {
+        AsyncStream { continuation in
             Task {
                 do {
-                    let request = Classnotes_V1_GetProcessingStatusRequest.with {
-                        $0.classNoteID = classNoteId
+                    let request = Classnotes_V1_StreamProcessingStatusRequest.with {
+                        $0.lessonID = lessonID
                     }
-                    
-                    let stream = try await classNotesClient.getProcessingStatus(request)
-                    
+
+                    let client = provider.getServiceClient()
+                    let stream = client.streamProcessingStatus(request)
+
                     for try await status in stream {
                         continuation.yield(ProcessingStatus(from: status))
                     }
-                    
+
                     continuation.finish()
                 } catch {
                     continuation.finish(throwing: error)
@@ -93,150 +98,95 @@ final class ClassNotesService: ObservableObject {
             }
         }
     }
-    
-    // MARK: - Class Note Operations
-    
-    /// List class notes with pagination
-    func listClassNotes(
-        pageSize: Int32 = 20,
-        pageToken: String? = nil
-    ) async throws -> Classnotes_V1_ListClassNotesResponse {
-        let request = Classnotes_V1_ListClassNotesRequest.with {
-            $0.pageSize = pageSize
-            if let token = pageToken {
-                $0.pageToken = token
-            }
-        }
-        
-        return try await classNotesClient.listClassNotes(request)
-    }
-    
-    /// Get a specific class note by ID
-    func getClassNote(id: String) async throws -> ClassNote {
-        let request = Classnotes_V1_GetClassNoteRequest.with {
-            $0.classNoteID = id
-        }
-        
-        let response = try await classNotesClient.getProcessedClassNote(request)
-        return ClassNote(from: response.classNote)
-    }
-    
-    /// Delete a class note
-    func deleteClassNote(id: String) async throws {
-        let request = Classnotes_V1_DeleteClassNoteRequest.with {
-            $0.classNoteID = id
-        }
-        
-        _ = try await classNotesClient.deleteClassNote(request)
-    }
-    
-    // MARK: - Search Operations
-    
-    /// Search class notes
-    func searchClassNotes(
-        query: String,
-        filters: SearchFilters? = nil,
-        pageSize: Int32 = 20,
-        pageToken: String? = nil
-    ) async throws -> Classnotes_V1_SearchClassNotesResponse {
-        let request = Classnotes_V1_SearchClassNotesRequest.with {
-            $0.query = query
-            $0.pageSize = pageSize
-            if let token = pageToken {
-                $0.pageToken = token
-            }
-            if let filters = filters {
-                $0.filters = filters.toProto()
-            }
-        }
-        
-        return try await classNotesClient.searchClassNotes(request)
-    }
-}
 
-// MARK: - Data Models
+    // MARK: - Document Operations
 
-/// Transcript metadata
-struct TranscriptMetadata {
-    let duration: TimeInterval
-    let language: String
-    let confidence: Float?
-    
-    func toProto() -> Classnotes_V1_TranscriptMetadata {
-        return Classnotes_V1_TranscriptMetadata.with {
-            $0.duration = Int64(duration)
-            $0.language = language
-            if let confidence = confidence {
-                $0.confidence = confidence
-            }
-        }
-    }
-}
-
-/// Document data for upload
-struct DocumentData {
-    let filename: String
-    let mimeType: String
-    let data: Data
-    
-    func toProto() -> Classnotes_V1_Document {
-        return Classnotes_V1_Document.with {
-            $0.filename = filename
+    /// Upload a transcript with audio
+    func uploadTranscript(
+        classNoteId: String,
+        audioData: Data,
+        mimeType: String,
+        duration: Double,
+        language: String = "en"
+    ) async throws -> Classnotes_V1_UploadTranscriptResponse {
+        let request = Classnotes_V1_UploadTranscriptRequest.with {
+            $0.classNoteID = classNoteId
+            $0.audioData = audioData
             $0.mimeType = mimeType
-            $0.data = data
+            $0.durationSeconds = duration
+            $0.language = language
+        }
+
+        do {
+            let client = provider.getServiceClient()
+            return try await client.uploadTranscript(request)
+        } catch {
+            throw mapGRPCError(error)
+        }
+    }
+
+    // MARK: - Batch Operations
+
+    /// Batch delete lessons with progress tracking
+    func batchDeleteLessons(_ lessonIDs: [String]) async throws {
+        // Show progress
+        let progress = Progress(totalUnitCount: Int64(lessonIDs.count))
+
+        // Batch into chunks
+        let chunks = lessonIDs.chunked(into: 10)
+
+        for chunk in chunks {
+            let request = Classnotes_V1_BatchDeleteLessonsRequest.with {
+                $0.lessonIds = chunk
+            }
+
+            do {
+                let client = provider.getServiceClient()
+                _ = try await client.batchDeleteLessons(request)
+                progress.completedUnitCount += Int64(chunk.count)
+            } catch {
+                throw mapGRPCError(error)
+            }
+        }
+    }
+
+    // MARK: - Real-time Updates
+
+    /// Observe all processing updates for current user
+    func observeProcessingUpdates() -> AsyncStream<ProcessingUpdate> {
+        AsyncStream { continuation in
+            let task = Task {
+                do {
+                    let client = provider.getServiceClient()
+                    let stream = client.streamAllProcessingUpdates(Google_Protobuf_Empty())
+
+                    for try await update in stream {
+                        // Filter updates for current user
+                        if update.userID == AuthenticationService.shared.currentUser?.id.uuidString
+                        {
+                            continuation.yield(ProcessingUpdate(from: update))
+                        }
+                    }
+                } catch {
+                    logger.error("Stream error: \(error)")
+                }
+
+                continuation.finish()
+            }
+
+            continuation.onTermination = { _ in
+                task.cancel()
+            }
         }
     }
 }
 
-/// Processing status
-struct ProcessingStatus {
-    let stage: String
-    let progress: Double
-    let isComplete: Bool
-    let error: String?
-    
-    init(from proto: Classnotes_V1_ProcessingStatus) {
-        self.stage = proto.stage
-        self.progress = proto.progress
-        self.isComplete = proto.isComplete
-        self.error = proto.error.isEmpty ? nil : proto.error
-    }
-}
+// MARK: - Array Extension for Chunking
 
-/// Search filters
-struct SearchFilters {
-    let courseIds: [String]?
-    let startDate: Date?
-    let endDate: Date?
-    let tags: [String]?
-    
-    func toProto() -> Classnotes_V1_SearchFilters {
-        return Classnotes_V1_SearchFilters.with {
-            if let courseIds = courseIds {
-                $0.courseIds = courseIds
-            }
-            if let startDate = startDate {
-                $0.startDate = Google_Protobuf_Timestamp(date: startDate)
-            }
-            if let endDate = endDate {
-                $0.endDate = Google_Protobuf_Timestamp(date: endDate)
-            }
-            if let tags = tags {
-                $0.tags = tags
-            }
+extension Array {
+    func chunked(into size: Int) -> [[Element]] {
+        return stride(from: 0, to: count, by: size).map {
+            Array(self[$0..<Swift.min($0 + size, count)])
         }
     }
 }
-
-// MARK: - Empty Transport
-
-/// Temporary transport for initialization
-private struct EmptyTransport: ClientTransport {
-    func connect(lazily: Bool) async throws -> any Streaming {
-        throw GRPCError.transportNotInitialized
-    }
-    
-    func close() async {
-        // No-op
-    }
-} 
